@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include "repl.h"
 
 int main() {
-    printf("Hello from WSL C Environment!\n");
+    repl_start();
     return 0;
 }
