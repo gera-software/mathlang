@@ -3,6 +3,51 @@
 #include <stdlib.h>
 #include <string.h>
 
+void newMathSymbol(TokenList *list, int line, int column, TokenType type) {
+    Token t = {
+        .type = type,
+        .value = 0,
+        .line = line,
+        .column = column,
+    };
+
+    pushToken(list, t);
+}
+
+void newDigit(TokenList *list, int line, int column, char char_digit) {
+    int int_digit = char_digit - '0'; // convert a single character digit to its actual mathematical integer value
+    Token token = {
+        .type = DIGIT,
+        .value = int_digit,
+        .line = line,
+        .column = column,
+    }; 
+
+    // if previous token is a number, concat them in a single token
+    if(list->count == 0) {
+        pushToken(list, token);
+    } else {
+        Token *previous = &list->tokens[list->count - 1];
+        
+        if(previous->type == DIGIT) {
+            char previous_digits[40]; // Certifique-se de que o tamanho é suficiente para o número e o '\0'
+            // Converte o inteiro para string com segurança
+            snprintf(previous_digits, sizeof(previous_digits), "%d", previous->value);
+            
+            // Une a string e o caractere com segurança no novo array
+            char resultado[50];
+            snprintf(resultado, sizeof(resultado), "%s%c", previous_digits, char_digit);
+           
+            // convert string para numero novamente
+            int new_value = atoi(resultado);
+            printf("new int %d\n", new_value);
+            previous->value = new_value;
+        } else {
+            pushToken(list, token);
+        }
+    } 
+}
+
 bool pushToken(TokenList *list, Token token) {
     if (list == NULL) {
         return false;
@@ -18,38 +63,9 @@ bool pushToken(TokenList *list, Token token) {
     //     list->capacity = new_capacity;
     // }
 
-    // if previous token is a number, concat them in a single token
-    if(token.type == DIGIT) {
-        if(list->count == 0) {
-            list->tokens[list->count] = token;
-            list->count++;
-        } else {
-            Token *previous = &list->tokens[list->count - 1];
-            
-            char previous_digit[40]; // Certifique-se de que o tamanho é suficiente para o número e o '\0'
-            // Converte o inteiro para string com segurança
-            snprintf(previous_digit, sizeof(previous_digit), "%d", previous->value);
-            
-            char current_digit[20]; // Certifique-se de que o tamanho é suficiente para o número e o '\0'
-            // Converte o inteiro para string com segurança
-            snprintf(current_digit, sizeof(current_digit), "%d", token.value);
-            
-            printf("previous digit %s\n", previous_digit);
-            printf("current digit %s\n", current_digit);
-            
-            // Concatena strings
-            strcat(previous_digit, current_digit);
-            printf("new string %s\n", previous_digit);
-            
-            // convert string para numero novamente
-            int new_value = atoi(previous_digit);
-            printf("new int %d\n", new_value);
-            previous->value = new_value;
-        }
-    } else {
-        list->tokens[list->count] = token;
-        list->count++;
-    }
+    list->tokens[list->count] = token;
+    list->count++;
+    
     return true;
 }
 
@@ -89,12 +105,6 @@ TokenList lex(const char *input) {
     int index = 0;
     int line = 1;
     int column = 1;
-    Token t = {
-        .type = INVALID,
-        .value = 0,
-        .line = line,
-        .column = column,
-    };
     while(input[index] != '\0') {
         switch (input[index]) {
             // increment new line
@@ -108,46 +118,22 @@ TokenList lex(const char *input) {
             case '\t':
                 break;
             case '+':
-                t.type = PLUS;
-                t.value = 0;
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newMathSymbol(&list, line, column, PLUS);
                 break;
             case '-':
-                t.type = MINUS;
-                t.value = 0;
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newMathSymbol(&list, line, column, MINUS);
                 break;
             case '*':
-                t.type = STAR;
-                t.value = 0;
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newMathSymbol(&list, line, column, STAR);
                 break;
             case '/':
-                t.type = SLASH;
-                t.value = 0;
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newMathSymbol(&list, line, column, SLASH);
                 break;
             case '(':
-                t.type = LPAREN;
-                t.value = 0;
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newMathSymbol(&list, line, column, LPAREN);
                 break;
             case ')':
-                t.type = RPAREN;
-                t.value = 0;
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newMathSymbol(&list, line, column, RPAREN);
                 break;
             case '0':
             case '1':
@@ -159,18 +145,10 @@ TokenList lex(const char *input) {
             case '7':
             case '8':
             case '9':
-                t.type = DIGIT;
-                t.value = input[index] - '0'; // convert a single character digit to its actual mathematical integer value
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newDigit(&list, line, column, input[index]);
                 break;
             default:
-                t.type = INVALID;
-                t.value = 0;
-                t.line = line;
-                t.column = column;
-                pushToken(&list, t);
+                newMathSymbol(&list, line, column, INVALID);
                 break;
         }
 
