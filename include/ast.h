@@ -9,6 +9,18 @@ typedef enum {
     NODE_NEG, // Menos Unário (-A)
 } NodeType;
 
+const char* get_node_type_name(NodeType type) {
+    switch(type) {
+        case NODE_INT: return "INT";
+        case NODE_ADD: return "ADD";
+        case NODE_SUB: return "SUB";
+        case NODE_MUL: return "MUL";
+        case NODE_DIV: return "DIV";
+        case NODE_NEG: return "NEG";
+        default: return "UNKNOWN";
+    }
+}
+
 typedef struct ASTNode {
     NodeType type;
     union {

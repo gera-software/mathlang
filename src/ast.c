@@ -43,7 +43,7 @@ void print_ast(ASTNode *node, int level) {
     if(node->type == NODE_INT) {
         printf("%d\n", node->data.value);
     } else {
-        printf("<%d>\n", node->type);
+        printf("<%s>\n", get_node_type_name(node->type));
         if(node->type == NODE_NEG) {
             print_ast(node->data.unary.operand, level + 1);
         } else {
