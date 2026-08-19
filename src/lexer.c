@@ -62,80 +62,69 @@ TokenList lex(const char *input) {
     int line = 1;
     int column = 1;
     while(input[index] != '\0') {
-        if(input[index] == ' ' || input[index] == '\t') {
+        Token t = {
+            .type = INVALID,
+            .value = 0,
+            .line = line,
+            .column = column,
+        };
+        switch (input[index]) {
+            // increment new line
+            case '\n':
+            case '\r':
+                line++;
+                column = 0;
+                break;
             // ignore whitespace
-        } else if(input[index] == '\n' || input[index] == '\r') {
-            line++;
-            column = 0;
-        } else if(input[index] == '+') {
-            Token t = {
-                .type = PLUS,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
-        } else if(input[index] == '-') {
-            Token t = {
-                .type = MINUS,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
-        } else if(input[index] == '*') {
-            Token t = {
-                .type = STAR,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
-        } else if(input[index] == '/') {
-            Token t = {
-                .type = SLASH,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
-        } else if(input[index] == '(') {
-            Token t = {
-                .type = LPAREN,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
-        } else if(input[index] == ')') {
-            Token t = {
-                .type = RPAREN,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
-        } else if(input[index] == '0') {
-            Token t = {
-                .type = DIGIT,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
-        } else {
-            Token t = {
-                .type = INVALID,
-                .value = 0,
-                .line = line,
-                .column = column,
-            };
-            pushToken(&list, &t);
+            case ' ':
+            case '\t':
+                break;
+            case '+':
+                t.type = PLUS;
+                pushToken(&list, &t);
+                break;
+            case '-':
+                t.type = MINUS;
+                pushToken(&list, &t);
+                break;
+            case '*':
+                t.type = STAR;
+                pushToken(&list, &t);
+                break;
+            case '/':
+                t.type = SLASH;
+                pushToken(&list, &t);
+                break;
+            case '(':
+                t.type = LPAREN;
+                pushToken(&list, &t);
+                break;
+            case ')':
+                t.type = RPAREN;
+                pushToken(&list, &t);
+                break;
+            case '0':
+                t.type = DIGIT;
+                t.value = 0;
+                pushToken(&list, &t);
+                break;
+            default:
+                t.type = INVALID;
+                pushToken(&list, &t);
+                break;
         }
 
         column++;
         index++;
     }
+    
+    Token end_token = {
+        .type = END,
+        .value = 0,
+        .line = line,
+        .column = column,
+    };
+    pushToken(&list, &end_token);
 
     return list;
 }
