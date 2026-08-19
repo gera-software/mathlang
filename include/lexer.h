@@ -17,7 +17,7 @@ typedef enum TokenType {
 typedef struct Token {
     TokenType type;
     int value;
-    int column;
+    int column; // start from 0 index
 } Token;
 
 typedef struct Lexer {
@@ -26,3 +26,7 @@ typedef struct Lexer {
 } Lexer;
 
 Token lexer_next_token(Lexer* lexer);
+
+bool is_digit(char c);
+
+bool is_space(char c);
