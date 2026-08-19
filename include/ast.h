@@ -1,11 +1,12 @@
 #pragma once
 
 typedef enum {
-    NODE_INT,
-    NODE_ADD,
-    NODE_SUB,
-    NODE_MUL,
-    NODE_DIV,
+    NODE_INT, // Número inteiro
+    NODE_ADD, // Soma (A+B)
+    NODE_SUB, // Subtração (A-B)
+    NODE_MUL, // Multiplicação (A*B)
+    NODE_DIV, // Divisão (A/B)
+    NODE_NEG, // Menos Unário (-A)
 } NodeType;
 
 typedef struct ASTNode {
@@ -16,10 +17,14 @@ typedef struct ASTNode {
             struct ASTNode *left;
             struct ASTNode *right;
         } op; // Usado para operações binárias (+, -, *, /)
+        struct {
+            struct ASTNode *operand;
+        } unary; // Usado para operações unárias (NODE_NEG)
     } data;
 } ASTNode;
 
 ASTNode* create_int_node(int val);
-ASTNode* create_op_node(NodeType type, ASTNode *left, ASTNode *right);
+ASTNode* create_binary_op_node(NodeType type, ASTNode *left, ASTNode *right);
+ASTNode* create_unary_op_node(NodeType type, ASTNode *operand);
 void free_ast(ASTNode *node);
 void print_ast(ASTNode *node, int level);

@@ -11,13 +11,22 @@ ASTNode* create_int_node(int val) {
     return node;
 }
 
-ASTNode* create_op_node(NodeType type, ASTNode *left, ASTNode *right) {
+ASTNode* create_binary_op_node(NodeType type, ASTNode *left, ASTNode *right) {
     ASTNode *node = malloc(sizeof(ASTNode));
     if(node == NULL) { return NULL; }
 
     node->type = type;
     node->data.op.left = left;
     node->data.op.right = right;
+    return node;
+}
+
+ASTNode* create_unary_op_node(NodeType type, ASTNode *operand) {
+    ASTNode* node = malloc(sizeof(ASTNode));
+    if(node == NULL) { return NULL; }
+
+    node->type = type;
+    node->data.unary.operand = operand;
     return node;
 }
 
@@ -35,15 +44,21 @@ void print_ast(ASTNode *node, int level) {
         printf("%d\n", node->data.value);
     } else {
         printf("<%d>\n", node->type);
-        print_ast(node->data.op.left, level + 1);
-        print_ast(node->data.op.right, level + 1);
+        if(node->type == NODE_NEG) {
+            print_ast(node->data.unary.operand, level + 1);
+        } else {
+            print_ast(node->data.op.left, level + 1);
+            print_ast(node->data.op.right, level + 1);
+        }
     }
 }
 
 void free_ast(ASTNode *node) {
     if(!node) return;
 
-    if(node->type != NODE_INT) {
+    if(node->type == NODE_NEG) {
+        free_ast(node->data.unary.operand);
+    } else if(node->type != NODE_INT) {
         free_ast(node->data.op.left);
         free_ast(node->data.op.right);
     }
