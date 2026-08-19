@@ -1,21 +1,6 @@
 #include <criterion/criterion.h>
 #include "ast.h"
-
-Test(ast_suite, print_ast) {
-    ASTNode *num1 = create_int_node(5);
-    ASTNode *num2 = create_int_node(6);
-    ASTNode *num3 = create_int_node(7);
-    ASTNode *num4 = create_int_node(8);
-    ASTNode *op1 = create_unary_op_node(NODE_NEG, num1);
-    ASTNode *op2 = create_binary_op_node(NODE_MUL, op1, num2);
-    ASTNode *op3 = create_binary_op_node(NODE_DIV, num3, num4);
-    
-    ASTNode *root = create_binary_op_node(NODE_ADD, op2, op3);
-    
-    print_ast(root, 0);
-    
-    free_ast(root);
-}
+#include <stdio.h>
 
 Test(ast_suite, should_create_int_node) {
     ASTNode *node = create_int_node(50);
@@ -63,4 +48,37 @@ Test(ast_suite, should_create_unary_op_nodes) {
     ASTNode *node_neg = create_unary_op_node(NODE_NEG, node1);
     cr_assert_eq(node_neg->type, NODE_NEG);
     cr_assert_eq(node_neg->data.unary.operand, node1);
+}
+
+Test(ast_suite, should_print_ast) {
+    ASTNode *num1 = create_int_node(5);
+    ASTNode *num2 = create_int_node(6);
+    ASTNode *num3 = create_int_node(7);
+    ASTNode *num4 = create_int_node(8);
+    ASTNode *op1 = create_unary_op_node(NODE_NEG, num1);
+    ASTNode *op2 = create_binary_op_node(NODE_MUL, op1, num2);
+    ASTNode *op3 = create_binary_op_node(NODE_DIV, num3, num4);
+    
+    ASTNode *root = create_binary_op_node(NODE_ADD, op2, op3);
+    
+    print_ast(root, 0);
+    
+    free_ast(root);
+}
+
+Test(ast_suite, should_pretty_print_ast) {
+    ASTNode *num1 = create_int_node(5);
+    ASTNode *num2 = create_int_node(6);
+    ASTNode *num3 = create_int_node(7);
+    ASTNode *num4 = create_int_node(8);
+    ASTNode *op1 = create_unary_op_node(NODE_NEG, num1);
+    ASTNode *op2 = create_binary_op_node(NODE_MUL, op1, num2);
+    ASTNode *op3 = create_binary_op_node(NODE_DIV, num3, num4);
+    
+    ASTNode *root = create_binary_op_node(NODE_ADD, op2, op3);
+    
+    ast_to_string(root);
+    printf("\n");
+    
+    free_ast(root);
 }
