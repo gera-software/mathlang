@@ -43,7 +43,7 @@ typedef struct TokenList {
     char error_message[256];
 } TokenList;
 
-bool pushToken(TokenList *list, Token *token);
+bool pushToken(TokenList *list, Token token);
 
 /**
  * Tokenizes the input string. Returns a TokenList.
