@@ -1,168 +1,80 @@
 #include "lexer.h"
-#include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
-void newMathSymbol(TokenList *list, int line, int column, TokenType type) {
-    Token t = {
-        .type = type,
-        .value = 0,
-        .line = line,
-        .column = column,
-    };
-
-    pushToken(list, t);
+bool is_digit(char c) {
+    switch(c) {
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return true;
+        default:
+            return false;
+    }
 }
 
-void newDigit(TokenList *list, int line, int column, char char_digit) {
-    int int_digit = char_digit - '0'; // convert a single character digit to its actual mathematical integer value
-    Token token = {
-        .type = DIGIT,
-        .value = int_digit,
-        .line = line,
-        .column = column,
-    }; 
+// int string_to_int(const char* string, char** endptrl) {
+//     // int i = 0;
+//     // while(string[i] != '\0' && is_digit(string[i])) {
+//     //     i++;
+//     // }
+//     char *endptr;
 
-    // if previous token is a number, concat them in a single token
-    if(list->count == 0) {
-        pushToken(list, token);
-    } else {
-        Token *previous = &list->tokens[list->count - 1];
-        
-        if(previous->type == DIGIT) {
-            char previous_digits[40]; // Certifique-se de que o tamanho é suficiente para o número e o '\0'
-            // Converte o inteiro para string com segurança
-            snprintf(previous_digits, sizeof(previous_digits), "%d", previous->value);
-            
-            // Une a string e o caractere com segurança no novo array
-            char resultado[50];
-            snprintf(resultado, sizeof(resultado), "%s%c", previous_digits, char_digit);
-           
-            // convert string para numero novamente
-            int new_value = atoi(resultado);
-            printf("new int %d\n", new_value);
-            previous->value = new_value;
-        } else {
-            pushToken(list, token);
-        }
-    } 
-}
+//     long val = strtol(string, &endptr, 10); // Base 10 conversion
+//     printf("%d , endptrl: -%c-\n", (int)val, *endptr);
 
-bool pushToken(TokenList *list, Token token) {
-    if (list == NULL) {
-        return false;
+//     if (string == endptr) {
+//         printf("Error: No digits found.\n");
+//     }
+
+//     // Check for partial invalid characters (e.g., "123xyz")
+//     if (*endptr != '\0') {
+//         printf("Warning: Partial conversion. Non-numeric character found: -%c-\n", *endptr);
+//     }
+//     return (int)val; // Safe to cast if within range
+// }
+
+Token lexer_next_token(Lexer* lexer) {
+    char current = lexer->source[lexer->cursor];
+
+    if(current == '\0') return (Token){ END, 0, lexer->cursor++ }; 
+
+    // lexer->cursor++;
+
+    switch(current) {
+        case '+':
+            return (Token) { PLUS, 0, lexer->cursor++ };
+        case '-':
+            return (Token) { MINUS, 0, lexer->cursor++ };
+        case '*':
+            return (Token) { STAR, 0, lexer->cursor++ };
+        case '/':
+            return (Token) { SLASH, 0, lexer->cursor++ };
+        case '(':
+            return (Token) { LPAREN, 0, lexer->cursor++ };
+        case ')':
+            return (Token) { RPAREN, 0, lexer->cursor++ };
     }
 
-    // if (list->count >= list->capacity) {
-    //     size_t new_capacity = list->capacity == 0 ? 16 : list->capacity * 2;
-    //     Token *resized_tokens = realloc(list->tokens, new_capacity * sizeof(Token));
-    //     if (resized_tokens == NULL) {
-    //         return false;
-    //     }
-    //     list->tokens = resized_tokens;
-    //     list->capacity = new_capacity;
-    // }
+    if(is_digit(current)) {
+        // lexer->cursor--; // Step back to read full number
+        size_t start_pos = lexer->cursor;
+        char* endptr;
 
-    list->tokens[list->count] = token;
-    list->count++;
-    
-    return true;
-}
-
-void free_tokens(TokenList *list) {
-    if (list == NULL) {
-        return;
+        long val = strtol(&lexer->source[lexer->cursor], &endptr, 10); // Base 10 conversion
+        printf("%p: -%c-, ", (void*) &lexer->source[lexer->cursor], lexer->source[lexer->cursor]);
+        printf("%p: -%c-, ", (void*) endptr, *endptr);
+        if (*endptr != '\0') { printf("Unconverted trailing text: -%s-\n", endptr); }
+        lexer->cursor += (endptr - &lexer->source[lexer->cursor]);
+        printf("cursor: %lu\n", lexer->cursor);
+        return (Token){ NUMBER, (int)val, start_pos};
     }
 
-    free(list->tokens);
-    list->tokens = NULL;
-    list->count = 0;
-    list->capacity = 0;
-    list->error = 0;
-    list->error_message[0] = '\0';
-}
-
-TokenList lex(const char *input) {
-    TokenList list;
-    list.tokens = NULL;
-    list.count = 0;
-    list.capacity = 0;
-    list.error = 0;
-    strcpy(list.error_message, "");
-
-    int start_capacity = 16;
-    Token *tokens;
-
-    tokens = (Token *) malloc(sizeof(Token) * start_capacity);
-    if(tokens == NULL) {
-        list.error = 1;
-        strcpy(list.error_message, "Memória insuficiente!");
-        return list;
-    }
-    list.tokens = tokens;
-    list.capacity = start_capacity;
-
-    int index = 0;
-    int line = 1;
-    int column = 1;
-    while(input[index] != '\0') {
-        switch (input[index]) {
-            // increment new line
-            case '\n':
-            case '\r':
-                line++;
-                column = 0;
-                break;
-            // ignore whitespace
-            case ' ':
-            case '\t':
-                break;
-            case '+':
-                newMathSymbol(&list, line, column, PLUS);
-                break;
-            case '-':
-                newMathSymbol(&list, line, column, MINUS);
-                break;
-            case '*':
-                newMathSymbol(&list, line, column, STAR);
-                break;
-            case '/':
-                newMathSymbol(&list, line, column, SLASH);
-                break;
-            case '(':
-                newMathSymbol(&list, line, column, LPAREN);
-                break;
-            case ')':
-                newMathSymbol(&list, line, column, RPAREN);
-                break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                newDigit(&list, line, column, input[index]);
-                break;
-            default:
-                newMathSymbol(&list, line, column, INVALID);
-                break;
-        }
-
-        column++;
-        index++;
-    }
-    
-    Token end_token = {
-        .type = END,
-        .value = 0,
-        .line = line,
-        .column = column,
-    };
-    pushToken(&list, end_token);
-
-    return list;
+    return (Token){ INVALID, 0, lexer->cursor };
 }
