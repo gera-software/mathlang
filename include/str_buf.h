@@ -1,77 +1,89 @@
+/**
+ * @file str_buf.h
+ * @brief Growable string buffer (StrBuf) API.
+ *
+ * StrBuf provides a small, efficient, heap-backed growable string buffer
+ * with a lightweight API for appending and obtaining C-string views.
+ */
+
 #pragma once
 #include <stddef.h>
 
-/*
- * StrBuf -- a simple growable string buffer.
+/**
+ * @brief StrBuf -- a simple growable string buffer.
  *
- * Invariants:
- *  - sb->length <= sb->capacity
- *  - sb->data is either NULL (uninitialized / empty) or points to a
- *    heap allocation of size sb->capacity + 1 (space for terminating NUL).
+ * @invariant sb->length <= sb->capacity
+ * @invariant sb->data is either NULL (uninitialized/empty) or points to a
+ *            heap allocation of size sb->capacity + 1 (space for terminating NUL).
  *
- * Threading:
- *  - The API is not thread-safe. Concurrent access requires external
- *    synchronization by the caller.
+ * @note The API is not thread-safe. Concurrent access requires external
+ *       synchronization by the caller.
  */
 
 typedef struct StrBuf {
-    char *data;
-    size_t length;
-    size_t capacity;
+    char *data;     /**< Heap buffer holding the characters (may be NULL). */
+    size_t length;  /**< Number of valid characters in the buffer (not including NUL). */
+    size_t capacity;/**< Allocated capacity (number of characters, not counting NUL). */
 } StrBuf;
-
-/*
- * Initialize a StrBuf.
+/**
+ * @brief Initialize a StrBuf.
  *
- * - `initial_capacity` specifies the initial allocated capacity (not
- *   counting the terminating NUL). If 0, no allocation is performed and
- *   sb->data will be NULL.
- * - This function does not report allocation failure; if allocation fails
- *   sb->data will remain NULL and sb->capacity will be 0. Callers that need
- *   to observe allocation failures should check sb->data after calling.
+ * @param sb Pointer to StrBuf to initialize.
+ * @param initial_capacity Initial allocated capacity (not counting NUL). If
+ *        zero, no allocation is performed and sb->data will be NULL.
+ *
+ * @note This function does not report allocation failure. If allocation
+ *       fails sb->data will remain NULL and sb->capacity will be 0. Callers
+ *       that need to observe allocation failures should check sb->data.
  */
 void sb_init(StrBuf *sb, size_t initial_capacity);
 
-/*
- * Free the buffer and reset fields. Safe to call with sb == NULL.
+/**
+ * @brief Free the buffer and reset fields.
+ *
+ * @param sb StrBuf pointer (may be NULL).
  *
  * After return: sb->data == NULL, sb->length == 0, sb->capacity == 0.
  */
 void sb_free(StrBuf *sb);
 
 /**
- * Ensure the buffer has at least `needed` bytes of capacity (not counting
- * the terminating NUL).
+ * @brief Ensure the buffer has at least `needed` bytes of capacity (not
+ * counting the terminating NUL).
  *
  * Behavior:
  *  - Grows the buffer capacity preserving existing contents.
  *  - Never shrinks the capacity.
  *  - Ensures there is room for a terminating '\0' byte at index capacity.
  *
- * Return:
- *  - 0 on success.
- *  - -1 on allocation failure or if `sb` is NULL.
+ * @param sb StrBuf pointer (must not be NULL).
+ * @param needed Requested capacity (number of characters, not counting NUL).
+ * @return 0 on success, -1 on allocation failure or invalid input.
  *
- * On failure the StrBuf state is left as it was prior to the call (no
- * partial shrink/resize). Callers relying on growth must check the
- * return value.
+ * @note On failure the StrBuf state is left as it was prior to the call (no
+ * partial shrink/resize). Callers relying on growth must check the return
+ * value.
  */
 int sb_reserve(StrBuf *sb, size_t needed);
 
 /**
- * Reset the buffer length to zero while retaining the allocated capacity.
+ * @brief Reset the buffer length to zero while retaining the allocated
+ * capacity.
+ *
+ * @param sb StrBuf pointer (may be NULL).
  *
  * After this call:
  *  - sb->length == 0
  *  - sb->data is unchanged (except the first byte is set to '\0' if data != NULL)
  *  - sb->capacity is unchanged
- *
- * Safe to call with sb == NULL (no-op).
  */
 void sb_clear(StrBuf *sb);
 
 /**
- * Append a character to the existing buffer.
+ * @brief Append a character to the existing buffer.
+ *
+ * @param sb StrBuf pointer (may be NULL).
+ * @param c Character to append.
  *
  * Behavior:
  *  - Attempts to grow the buffer as needed. If allocation fails during
@@ -81,10 +93,12 @@ void sb_clear(StrBuf *sb);
 void sb_append_char(StrBuf *sb, char c);
 
 /**
- * Append a NUL-terminated C string to the existing buffer.
+ * @brief Append a NUL-terminated C string to the existing buffer.
  *
- * Behavior and failure modes are the same as sb_append_char. Passing a
- * NULL `str` is treated as a no-op.
+ * @param sb StrBuf pointer (may be NULL).
+ * @param str NUL-terminated C string to append; passing NULL is a no-op.
+ *
+ * Behavior and failure modes are the same as sb_append_char.
  */
 void sb_append(StrBuf *sb, const char *str);
 
@@ -92,7 +106,7 @@ void sb_append(StrBuf *sb, const char *str);
 // void  sb_appendf(StrBuf *sb, const char *fmt, ...);
 
 /**
- * Return a pointer to a NUL-terminated C string view of the buffer.
+ * @brief Return a pointer to a NUL-terminated C string view of the buffer.
  *
  * Contract and lifetime:
  *  - Returns a pointer to the internal buffer (sb->data). The pointer is
@@ -109,21 +123,22 @@ void sb_append(StrBuf *sb, const char *str);
  * Thread safety:
  *  - Not thread-safe. Concurrent mutation and read may cause data races and
  *    undefined behavior.
+ *
+ * @param sb StrBuf pointer.
+ * @return Pointer to internal NUL-terminated string, or "" on error.
  */
 const char *sb_cstr(StrBuf *sb);
 
 /**
- * Return a newly-allocated NUL-terminated copy of the buffer contents.
+ * @brief Return a newly-allocated NUL-terminated copy of the buffer contents.
  *
  * Ownership:
  *  - The returned pointer is owned by the caller and must be freed with free().
  *
- * Return:
- *  - On success returns a malloc()'d buffer containing the string.
- *  - Returns NULL if allocation fails.
- *  - If `sb` is NULL or uninitialized (sb->data == NULL) this returns an
- *    allocated empty string (i.e., equivalent to strdup("")) on success,
- *    or NULL on allocation failure.
+ * @param sb StrBuf pointer (may be NULL).
+ * @return malloc()'d copy on success, NULL on allocation failure. If `sb`
+ *         is NULL or uninitialized (sb->data == NULL) this returns an
+ *         allocated empty string (equivalent to strdup("")) on success.
  */
 char *sb_cstr_copy(const StrBuf *sb);
  

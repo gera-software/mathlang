@@ -58,10 +58,19 @@ int sb_reserve(StrBuf *sb, size_t needed) {
 
 
 /**
- * Ensures the buffer has minimal capacity.
- * 
- * Used to extend buffer capacity before appending extra characters
- * Returns 0 on success, -1 on allocation failure or invalid input.
+ * @internal
+ * @brief Ensure the buffer has room for `extra_len` more characters
+ *        (not counting the terminating NUL).
+ *
+ * This internal helper computes the required capacity, grows the buffer
+ * using sb_reserve() with an exponential strategy, and returns an error on
+ * allocation failure.
+ *
+ * @param sb StrBuf pointer (must not be NULL).
+ * @param extra_len Number of additional characters to accommodate.
+ * @return 0 on success, -1 on allocation failure or invalid input.
+ *
+ * @note On failure the StrBuf state is left unchanged.
  */
 static int sb_ensure_capacity(StrBuf *sb, size_t extra_len) {
     if(sb == NULL) return -1;
@@ -88,7 +97,20 @@ static int sb_ensure_capacity(StrBuf *sb, size_t extra_len) {
 }
 
 /**
- * Append bytes to the end of string buffer data
+ * @internal
+ * @brief Append raw bytes into the buffer (internal helper).
+ *
+ * Ensures capacity for `len` bytes and copies `len` bytes from `data`
+ * into the buffer, updating sb->length and writing the terminating NUL.
+ *
+ * Behavior:
+ *  - No-op and returns immediately if sb == NULL, data == NULL, or len == 0.
+ *  - If capacity growth fails the append is aborted and the buffer is left
+ *    unchanged.
+ *
+ * @param sb StrBuf pointer.
+ * @param data Pointer to bytes to append.
+ * @param len Number of bytes to append.
  */
 static void sb_append_bytes(StrBuf *sb, const char *data, size_t len) {
     if(sb == NULL || data == NULL || len == 0) {
