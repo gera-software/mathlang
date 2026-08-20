@@ -34,3 +34,26 @@ void sb_free(StrBuf *sb) {
     sb->length = 0;
     sb->capacity = 0;
 }
+
+void sb_append_char(StrBuf *sb, char c) {
+    if(sb == NULL) {
+        return;
+    }
+
+    sb->data[sb->length] = c;
+    sb->length++;
+    sb->data[sb->length] = '\0';
+}
+
+void sb_clear(StrBuf *sb) {
+    if (sb == NULL) {
+        return;
+    }
+
+    if (sb->data != NULL) {
+        sb->data[0] = '\0';
+    }
+
+    sb->length = 0;
+}
+
