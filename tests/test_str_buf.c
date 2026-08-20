@@ -208,3 +208,44 @@ Test(str_buf__clear, should_ignore_null_pointer) {
 }
 
 
+Test(str_buf__cstr, should_return_cstring_and_point_to_internal_data) {
+    StrBuf string = {0};
+    sb_init(&string, 8);
+
+    sb_append(&string, "hello");
+
+    const char *cstr = sb_cstr(&string);
+
+    cr_expect_not_null(cstr);
+    cr_expect_str_eq(cstr, "hello");
+    /* returned pointer should be the internal buffer */
+    cr_expect_eq((void *)cstr, (void *)string.data);
+}
+
+Test(str_buf__cstr, should_return_null_for_null_or_uninitialized_buffer) {
+    cr_expect_null(sb_cstr(NULL));
+
+    StrBuf string = {0};
+    sb_init(&string, 0); /* leaves data == NULL */
+    cr_expect_null(sb_cstr(&string));
+}
+
+Test(str_buf__cstr, should_ensure_null_termination_when_length_equals_capacity) {
+    StrBuf string = {0};
+    sb_init(&string, 3);
+
+    /* Fill buffer exactly to capacity (without using sb_append to simulate edge) */
+    if (string.data != NULL) {
+        snprintf(string.data, string.capacity + 1, "abc");
+        string.length = 3;
+    }
+
+    const char *cstr = sb_cstr(&string);
+    cr_expect_not_null(cstr);
+    cr_expect_str_eq(cstr, "abc");
+    /* explicit null terminator at sb->length must be present */
+    if (string.data != NULL) {
+        cr_expect_eq(string.data[string.length], '\0');
+    }
+}
+
