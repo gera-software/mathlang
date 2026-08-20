@@ -54,50 +54,56 @@ void sb_reserve(StrBuf *sb, size_t needed) {
     }
 }
 
-void sb_append_char(StrBuf *sb, char c) {
-    if (sb == NULL) {
+
+/**
+ * Ensures the buffer has minimal capacity.
+ * 
+ * Used to extend buffer capacity before appending extra characters 
+ */
+static void sb_ensure_capacity(StrBuf *sb, size_t extra_len) {
+    if(sb == NULL) return;
+
+    size_t required = sb->length + extra_len;
+    if(required <= sb->capacity) {
         return;
     }
-    
-    size_t new_length = sb->length + 1;
 
-    if (sb->data == NULL || sb->capacity < new_length) {
-        size_t new_capacity = sb->capacity == 0 ? 1 : sb->capacity;
-        while (new_capacity < new_length) {
-            new_capacity *= 2;
-        }
-        sb_reserve(sb, new_capacity);
-        if (sb->data == NULL) {
-            return;
-        }
+    size_t new_capacity = sb->capacity == 0 ? 1 : sb->capacity;
+    while(new_capacity < required) {
+        new_capacity *= 2;
     }
 
-    sb->data[sb->length] = c;
-    sb->length = new_length;
+    sb_reserve(sb, new_capacity);
+    if (sb->data == NULL) {
+        return;
+    }
+}
+
+/**
+ * Append bytes to the end of string buffer data
+ */
+static void sb_append_bytes(StrBuf *sb, const char *data, size_t len) {
+    if(sb == NULL || data == NULL || len == 0) {
+        return;
+    }
+
+    sb_ensure_capacity(sb, len);
+
+    if(sb->data == NULL) {
+        return;
+    }
+
+    memcpy(sb->data + sb->length, data, len);
+    sb->length += len;
     sb->data[sb->length] = '\0';
 }
 
+void sb_append_char(StrBuf *sb, char c) {
+    sb_append_bytes(sb, &c, 1);
+}
+
 void sb_append(StrBuf *sb, const char *str) {
-    if (sb == NULL || str == NULL) {
-        return;
-    }
-
-    size_t len = strlen(str);
-    if(len == 0) {
-        return;
-    }
-
-    size_t required = sb->length + len;
-    if(required > sb->capacity) {
-        sb_reserve(sb, required);
-        if(sb->data == NULL) {
-            return;
-        }
-    }
-
-    memcpy(sb->data + sb->length, str, len);
-    sb->length += len;
-    sb->data[sb->length] = '\0';
+    sb_append_bytes(sb, str, strlen(str));
 }
 
 void sb_clear(StrBuf *sb) {
