@@ -1,6 +1,7 @@
 #include "str_buf.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 void sb_init(StrBuf *sb, size_t initial_capacity) {
     if (sb == NULL) {
@@ -73,6 +74,29 @@ void sb_append_char(StrBuf *sb, char c) {
 
     sb->data[sb->length] = c;
     sb->length = new_length;
+    sb->data[sb->length] = '\0';
+}
+
+void sb_append(StrBuf *sb, const char *str) {
+    if (sb == NULL || str == NULL) {
+        return;
+    }
+
+    size_t len = strlen(str);
+    if(len == 0) {
+        return;
+    }
+
+    size_t required = sb->length + len;
+    if(required > sb->capacity) {
+        sb_reserve(sb, required);
+        if(sb->data == NULL) {
+            return;
+        }
+    }
+
+    memcpy(sb->data + sb->length, str, len);
+    sb->length += len;
     sb->data[sb->length] = '\0';
 }
 

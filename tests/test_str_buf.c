@@ -134,6 +134,58 @@ Test(str_buf__append_char, should_ignore_null_pointer) {
     cr_assert(true);
 }
 
+Test(str_buf__append, should_append_a_string_to_empty_buffer) {
+    StrBuf string = {0};
+    sb_init(&string, 2);
+
+    sb_append(&string, "hello");
+
+    cr_expect_eq(string.length, 5);
+    cr_expect_geq(string.capacity, 5);
+    cr_expect_str_eq(string.data, "hello");
+}
+
+Test(str_buf__append, should_append_to_existing_content) {
+    StrBuf string = {0};
+    sb_init(&string, 4);
+
+    sb_append(&string, "hi");
+    sb_append(&string, " there");
+
+    cr_expect_eq(string.length, 8);
+    cr_expect_geq(string.capacity, 8);
+    cr_expect_str_eq(string.data, "hi there");
+}
+
+Test(str_buf__append, should_ignore_empty_string) {
+    StrBuf string = {0};
+    sb_init(&string, 8);
+
+    sb_append(&string, "");
+
+    cr_expect_eq(string.length, 0);
+    cr_expect_eq(string.capacity, 8);
+    cr_expect_str_empty(string.data);
+}
+
+Test(str_buf__append, should_reallocate_when_additional_text_exceeds_capacity) {
+    StrBuf string = {0};
+    sb_init(&string, 2);
+
+    sb_append(&string, "hi");
+    sb_append(&string, " there");
+
+    cr_expect_eq(string.length, 8);
+    cr_expect_gt(string.capacity, 2);
+    cr_expect_geq(string.capacity, 8);
+    cr_expect_str_eq(string.data, "hi there");
+}
+
+Test(str_buf__append, should_ignore_null_pointer) {
+    sb_append(NULL, "hello");
+    cr_assert(true);
+}
+
 Test(str_buf__clear, should_reset_length_and_keep_capacity) {
     StrBuf string = {0};
     sb_init(&string, 8);
