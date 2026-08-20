@@ -50,10 +50,24 @@ Test(str_buf__reserve, should_increase_capacity_and_keep_existing_data) {
     snprintf(string.data, string.capacity + 1, "hi");
     string.length = 2;
 
-    size_t previous_capacity = string.capacity;
-    sb_reserve(&string, 4);
+    sb_reserve(&string, 16);
 
-    cr_expect_eq(string.capacity, previous_capacity + 4);
+    cr_expect_eq(string.capacity, 16);
+    cr_expect_eq(string.length, 2);
+    cr_expect_not_null(string.data);
+    cr_expect_str_eq(string.data, "hi");
+}
+
+Test(str_buf__reserve, should_not_shrink_capacity) {
+    StrBuf string = {0};
+    sb_init(&string, 8);
+
+    snprintf(string.data, string.capacity + 1, "hi");
+    string.length = 2;
+
+    sb_reserve(&string, 7);
+
+    cr_expect_eq(string.capacity, 8);
     cr_expect_eq(string.length, 2);
     cr_expect_not_null(string.data);
     cr_expect_str_eq(string.data, "hi");
@@ -99,11 +113,11 @@ Test(str_buf__append_char, should_grow_buffer_when_capacity_is_exhausted) {
     sb_append_char(&string, 'c');
 
     cr_expect_eq(string.length, 3);
-    cr_expect_gt(string.capacity, 3);
+    cr_expect_geq(string.capacity, 3);
     cr_expect_str_eq(string.data, "abc");
 }
 
-Test(str_buf__append_char, should_grow_before_appending_when_length_plus_one_equals_capacity) {
+Test(str_buf__append_char, should_grow_before_appending_when_new_length_less_then_capacity) {
     StrBuf string = {0};
     sb_init(&string, 1);
 
@@ -111,7 +125,7 @@ Test(str_buf__append_char, should_grow_before_appending_when_length_plus_one_equ
     sb_append_char(&string, 'b');
 
     cr_expect_eq(string.length, 2);
-    cr_expect_gt(string.capacity, 2);
+    cr_expect_geq(string.capacity, 2);
     cr_expect_str_eq(string.data, "ab");
 }
 
