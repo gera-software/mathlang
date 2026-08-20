@@ -10,6 +10,10 @@ typedef struct StrBuf {
 void sb_init(StrBuf *sb, size_t initial_capacity);
 void sb_free(StrBuf *sb);
 /**
+ * Aumenta a capacidade do buffer
+ */
+void sb_reserve(StrBuf *sb, size_t needed);
+/**
  * Reset length but keep capacity
  */
 void sb_clear(StrBuf *sb);

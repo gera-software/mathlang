@@ -35,9 +35,39 @@ void sb_free(StrBuf *sb) {
     sb->capacity = 0;
 }
 
-void sb_append_char(StrBuf *sb, char c) {
-    if(sb == NULL) {
+void sb_reserve(StrBuf *sb, size_t needed) {
+    if (sb == NULL || needed == 0) {
         return;
+    }
+
+    size_t new_capacity = sb->capacity + needed;
+    char *new_data = realloc(sb->data, new_capacity + 1);
+    if (new_data == NULL) {
+        return;
+    }
+
+    sb->data = new_data;
+    sb->capacity = new_capacity;
+
+    if (sb->length < sb->capacity) {
+        sb->data[sb->length] = '\0';
+    }
+}
+
+void sb_append_char(StrBuf *sb, char c) {
+    if (sb == NULL) {
+        return;
+    }
+
+    if (sb->data == NULL || sb->length + 1 >= sb->capacity) {
+        size_t new_capacity = sb->capacity == 0 ? 1 : sb->capacity;
+        while (new_capacity <= sb->length + 1) {
+            new_capacity *= 2;
+        }
+        sb_reserve(sb, new_capacity - sb->capacity);
+        if (sb->data == NULL) {
+            return;
+        }
     }
 
     sb->data[sb->length] = c;
