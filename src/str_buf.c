@@ -37,7 +37,11 @@ void sb_free(StrBuf *sb) {
 }
 
 int sb_reserve(StrBuf *sb, size_t needed) {
-    if (sb == NULL || needed <= sb->capacity) {
+    if (sb == NULL) {
+        return -1;
+    }
+
+    if (needed <= sb->capacity) {
         return 0;
     }
 

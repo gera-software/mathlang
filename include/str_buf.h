@@ -125,7 +125,7 @@ void sb_append(StrBuf *sb, const char *str);
  *    undefined behavior.
  *
  * @param sb StrBuf pointer.
- * @return Pointer to internal NUL-terminated string, or "" on error.
+ * @return Pointer to internal NUL-terminated string, or NULL on error.
  */
 const char *sb_cstr(StrBuf *sb);
 

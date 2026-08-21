@@ -43,6 +43,15 @@ Test(str_buf__free, should_ignore_null_pointer) {
     cr_assert(true);
 }
 
+Test(str_buf__free, idempotent_double_free_safe) {
+    StrBuf sb = {0};
+    sb_init(&sb, 8);
+    sb_free(&sb);
+    /* second free should be safe */
+    sb_free(&sb);
+    cr_assert(true);
+}
+
 Test(str_buf__reserve, should_increase_capacity_and_keep_existing_data) {
     StrBuf string = {0};
     sb_init(&string, 8);
@@ -89,6 +98,21 @@ Test(str_buf__reserve, should_ignore_zero_size) {
 Test(str_buf__reserve, should_ignore_null_pointer) {
     sb_reserve(NULL, 4);
     cr_assert(true);
+}
+
+Test(str_buf__reserve, returns_codes_for_success_and_invalid_input) {
+    StrBuf sb = {0};
+    sb_init(&sb, 4);
+
+    int rc = sb_reserve(&sb, 16);
+    cr_expect_eq(rc, 0);
+    cr_expect_eq(sb.capacity, 16);
+
+    /* Null pointer should return -1 and not crash */
+    int rc_null = sb_reserve(NULL, 8);
+    cr_expect_eq(rc_null, -1);
+
+    sb_free(&sb);
 }
 
 Test(str_buf__append_char, should_append_characters_in_order) {
@@ -249,3 +273,70 @@ Test(str_buf__cstr, should_ensure_null_termination_when_length_equals_capacity) 
     }
 }
 
+Test(str_buf__cstr, view_is_invalidated_by_mutation) {
+    StrBuf sb = {0};
+    sb_init(&sb, 4);
+
+    sb_append(&sb, "ab");
+    const char *view = sb_cstr(&sb);
+    cr_expect_str_eq(view, "ab");
+
+    /* mutate: cause reallocation */
+    sb_append(&sb, "cdef");
+    /* view may now be dangling; obtain a new view for checking the current contents */
+    const char *new_view = sb_cstr(&sb);
+    cr_expect_str_eq(new_view, "abcdef");
+
+    sb_free(&sb);
+}
+
+Test(str_buf__cstr, defends_against_corrupted_length) {
+    StrBuf sb = {0};
+    sb_init(&sb, 4);
+
+    sb_append(&sb, "hi"); /* length = 2 */
+    /* artificially corrupt the state to simulate a bug: length > capacity */
+    sb.length = sb.capacity + 10;
+
+    /* sb_cstr should not crash; it either fixes the state or returns NULL */
+    (void)sb_cstr(&sb);
+    /* At minimum the call must complete without crashing. No strict expectation. */
+    cr_assert(true);
+    sb_free(&sb);
+}
+
+Test(str_buf__cstr_copy, returns_owned_copy_and_must_be_freed) {
+    StrBuf sb = {0};
+    sb_init(&sb, 8);
+
+    sb_append(&sb, "copyme");
+    char *copy = sb_cstr_copy(&sb);
+
+    cr_assert_not_null(copy);
+    cr_expect_str_eq(copy, "copyme");
+    /* copy is distinct from internal pointer */
+    cr_expect_neq((void *)copy, (void *)sb.data);
+
+    /* mutate sb and ensure copy is unchanged */
+    sb_append(&sb, "x");
+    cr_expect_str_eq(copy, "copyme");
+
+    free(copy);
+    sb_free(&sb);
+}
+
+Test(str_buf__cstr_copy, returns_allocated_empty_for_null_or_uninitialized) {
+    /* NULL StrBuf pointer returns allocated empty string */
+    char *from_null = sb_cstr_copy(NULL);
+    cr_expect_not_null(from_null);
+    cr_expect_str_empty(from_null);
+    free(from_null);
+
+    /* Uninitialized StrBuf (sb_init with 0) */
+    StrBuf sb = {0};
+    sb_init(&sb, 0);
+    char *from_uninit = sb_cstr_copy(&sb);
+    cr_expect_not_null(from_uninit);
+    cr_expect_str_empty(from_uninit);
+    free(from_uninit);
+}
