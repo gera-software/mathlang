@@ -162,4 +162,16 @@ char *sb_cstr_copy(const StrBuf *sb);
  *         allocation fails.
  */
 StrBuf *sb_dup(StrBuf *sb);
+
+/**
+ * @brief Print the contents of the buffer to standard output (for debug).
+ *
+ * The function writes the current buffer contents as a C string without adding
+ * a trailing newline.
+ *
+ * @param sb StrBuf pointer (may be NULL).
+ *
+ * @note If `sb` is NULL or `sb->data` is NULL, the function is a no-op.
+ */
+void sb_print(StrBuf *sb);
  

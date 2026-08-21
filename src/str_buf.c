@@ -1,5 +1,6 @@
 #include "str_buf.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -224,5 +225,13 @@ StrBuf *sb_dup(StrBuf *sb) {
     memcpy(copy->data, sb->data, sb->length + 1);
     copy->data[sb->length] = '\0';
     return copy;
+}
+
+void sb_print(StrBuf *sb) {
+    if (sb == NULL || sb->data == NULL) {
+        return;
+    }
+
+    printf("%.*s", (int)sb->length, sb->data);
 }
 
