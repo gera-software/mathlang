@@ -197,3 +197,32 @@ char *sb_cstr_copy(const StrBuf *sb) {
     return copy;
 }
 
+StrBuf *sb_dup(StrBuf *sb) {
+    if (sb == NULL) {
+        return NULL;
+    }
+
+    StrBuf *copy = malloc(sizeof(*copy));
+    if (copy == NULL) {
+        return NULL;
+    }
+
+    copy->length = sb->length;
+    copy->capacity = sb->capacity;
+    copy->data = NULL;
+
+    if (sb->data == NULL) {
+        return copy;
+    }
+
+    copy->data = malloc(sb->capacity + 1);
+    if (copy->data == NULL) {
+        free(copy);
+        return NULL;
+    }
+
+    memcpy(copy->data, sb->data, sb->length + 1);
+    copy->data[sb->length] = '\0';
+    return copy;
+}
+

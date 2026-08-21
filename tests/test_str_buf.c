@@ -340,3 +340,43 @@ Test(str_buf__cstr_copy, returns_allocated_empty_for_null_or_uninitialized) {
     cr_expect_str_empty(from_uninit);
     free(from_uninit);
 }
+
+Test(str_buf__dup, should_duplicate_non_empty_buffer) {
+    StrBuf original = {0};
+    sb_init(&original, 8);
+    sb_append(&original, "hello");
+
+    StrBuf *copy = sb_dup(&original);
+    cr_assert_not_null(copy);
+    cr_expect_eq(copy->length, original.length);
+    cr_expect_eq(copy->capacity, original.capacity);
+    cr_expect_not_null(copy->data);
+    cr_expect_str_eq(copy->data, original.data);
+    cr_expect_neq((void *)copy->data, (void *)original.data);
+
+    /* Mutating the original should not affect the duplicate */
+    sb_append(&original, " world");
+    cr_expect_str_eq(copy->data, "hello");
+
+    free(copy->data);
+    free(copy);
+    sb_free(&original);
+}
+
+Test(str_buf__dup, should_return_null_for_null_pointer) {
+    cr_expect_null(sb_dup(NULL));
+}
+
+Test(str_buf__dup, should_duplicate_empty_buffer) {
+    StrBuf original = {0};
+    sb_init(&original, 0);
+
+    StrBuf *copy = sb_dup(&original);
+    cr_assert_not_null(copy);
+    cr_expect_eq(copy->length, 0);
+    cr_expect_eq(copy->capacity, 0);
+    cr_expect_null(copy->data);
+
+    free(copy);
+    sb_free(&original);
+}

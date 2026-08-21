@@ -141,4 +141,25 @@ const char *sb_cstr(StrBuf *sb);
  *         allocated empty string (equivalent to strdup("")) on success.
  */
 char *sb_cstr_copy(const StrBuf *sb);
+
+/**
+ * @brief Return a deep copy of the given StrBuf.
+ *
+ * Ownership:
+ *  - The returned pointer is owned by the caller and must be freed with free()
+ *    for the StrBuf itself.
+ *  - If copy->data != NULL, that heap buffer must also be freed with free().
+ *
+ * Example cleanup:
+ *  - StrBuf *copy = sb_dup(&sb);
+ *  - if (copy != NULL) {
+ *      free(copy->data);
+ *      free(copy);
+ *    }
+ *
+ * @param sb StrBuf pointer (may be NULL).
+ * @return A newly allocated duplicate of `sb`, or NULL if `sb` is NULL or an
+ *         allocation fails.
+ */
+StrBuf *sb_dup(StrBuf *sb);
  
