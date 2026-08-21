@@ -210,13 +210,48 @@ Test(str_buf__append, should_ignore_null_pointer) {
     cr_assert(true);
 }
 
+Test(str_buf__append_buf, should_append_contents_of_another_buffer) {
+    StrBuf dst = {0};
+    StrBuf src = {0};
+
+    sb_init(&dst, 8);
+    sb_init(&src, 8);
+
+    sb_append(&dst, "hello");
+    sb_append(&src, " world");
+
+    sb_append_buf(&dst, &src);
+
+    cr_expect_eq(dst.length, 11);
+    cr_expect_geq(dst.capacity, 11);
+    cr_expect_str_eq(dst.data, "hello world");
+
+    sb_free(&src);
+    sb_free(&dst);
+}
+
+Test(str_buf__append_buf, should_ignore_null_or_empty_source) {
+    StrBuf dst = {0};
+    StrBuf empty = {0};
+    sb_init(&dst, 8);
+    sb_init(&empty, 8);
+
+    sb_append(&dst, "hello");
+    sb_append_buf(&dst, NULL);
+    sb_append_buf(&dst, &empty);
+
+    cr_expect_eq(dst.length, 5);
+    cr_expect_str_eq(dst.data, "hello");
+
+    sb_free(&empty);
+    sb_free(&dst);
+}
+
 Test(str_buf__clear, should_reset_length_and_keep_capacity) {
     StrBuf string = {0};
     sb_init(&string, 8);
 
-    // TODO replace to append char
-    snprintf(string.data, string.capacity + 1, "hello");
-    string.length = 5;
+    sb_append(&string, "hello");
 
     sb_clear(&string);
 

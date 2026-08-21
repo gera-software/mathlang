@@ -102,6 +102,20 @@ void sb_append_char(StrBuf *sb, char c);
  */
 void sb_append(StrBuf *sb, const char *str);
 
+/**
+ * @brief Append the contents of one StrBuf to another.
+ *
+ * This function appends the raw bytes stored in `src->data` to `dst` without
+ * modifying `src`. It reuses the internal `sb_append_bytes()` logic, so it
+ * follows the same growth, copy, and terminating-NUL behavior as the other
+ * append functions.
+ *
+ * @param dst Destination StrBuf pointer (may be NULL).
+ * @param src Source StrBuf pointer (may be NULL). Empty or uninitialized
+ *            buffers are treated as a no-op.
+ */
+void sb_append_buf(StrBuf *dst, const StrBuf *src);
+
 // void  sb_append_n(StrBuf *sb, const char *str, size_t n);
 // void  sb_appendf(StrBuf *sb, const char *fmt, ...);
 

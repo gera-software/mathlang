@@ -143,6 +143,14 @@ void sb_append(StrBuf *sb, const char *str) {
     sb_append_bytes(sb, str, strlen(str));
 }
 
+void sb_append_buf(StrBuf *dst, const StrBuf *src) {
+    if (src == NULL) {
+        return;
+    }
+
+    sb_append_bytes(dst, src->data, src->length);
+}
+
 void sb_clear(StrBuf *sb) {
     if (sb == NULL) {
         return;

@@ -54,6 +54,25 @@ else {
 sb_free(&sb);
 ```
 
+3) Append one StrBuf into another using the shared internal append helper
+
+```c
+StrBuf dst = {0};
+StrBuf src = {0};
+
+sb_init(&dst, 8);
+sb_init(&src, 8);
+
+sb_append(&dst, "hello");
+sb_append(&src, " world");
+
+sb_append_buf(&dst, &src);
+puts(dst.data);  /* prints: hello world */
+
+sb_free(&src);
+sb_free(&dst);
+```
+
 Notes and tips
 --------------
 
@@ -62,6 +81,9 @@ Notes and tips
 
 - sb_cstr may attempt to allocate or reallocate in order to correct an
   inconsistent buffer state; it returns an empty string literal "" on error.
+
+- sb_append_buf reuses the same internal growth/copy logic as sb_append,
+  so it keeps the same capacity, NUL-termination, and error behavior.
 
 - sb_reserve returns 0 on success and -1 on allocation failure; callers
   should check its return value when they require guaranteed capacity.
