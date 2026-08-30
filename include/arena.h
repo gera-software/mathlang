@@ -16,10 +16,10 @@ void *arena_push(Arena *arena, size_t bytes);
 void *arena_push_zero(Arena *arena, size_t bytes);
 
 // some macro helpers that I've found nice:
-// #define PushArray(arena, type, count) (type *)ArenaPush((arena), sizeof(type)*(count))
-// #define PushArrayZero(arena, type, count) (type *)ArenaPushZero((arena), sizeof(type)*(count))
-// #define PushStruct(arena, type) PushArray((arena), (type), 1)
-// #define PushStructZero(arena, type) PushArrayZero((arena), (type), 1)
+#define arena_push_array(arena, type, count) ((type *)arena_push((arena), sizeof(type) * (count)))
+#define arena_push_array_zero(arena, type, count) ((type *)arena_push_zero((arena), sizeof(type) * (count)))
+#define arena_push_struct(arena, type) ((type *)arena_push((arena), sizeof(type)))
+#define arena_push_struct_zero(arena, type) ((type *)arena_push_zero((arena), sizeof(type)))
 
 // pop some bytes off the 'stack' - the way to free
 // void arena_pop(Arena *arena, size_t bytes);
