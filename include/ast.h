@@ -1,5 +1,7 @@
 #pragma once
 
+#include "arena.h"
+
 typedef enum {
     NODE_INT, // Número inteiro
     NODE_ADD, // Soma (A+B)
@@ -23,10 +25,10 @@ typedef struct ASTNode {
     } data;
 } ASTNode;
 
-ASTNode* create_int_node(int val);
-ASTNode* create_binary_op_node(NodeType type, ASTNode *left, ASTNode *right);
-ASTNode* create_unary_op_node(NodeType type, ASTNode *operand);
-void free_ast(ASTNode *node);
+ASTNode* create_int_node(Arena *arena, int val);
+ASTNode* create_binary_op_node(Arena *arena, NodeType type, ASTNode *left, ASTNode *right);
+ASTNode* create_unary_op_node(Arena *arena, NodeType type, ASTNode *operand);
+// void free_ast(ASTNode *node);
 void print_ast(ASTNode *node, int level);
 
 void ast_to_string(ASTNode *node);

@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
+#include "arena.h"
 
-ASTNode* create_int_node(int val) {
-    ASTNode *node = malloc(sizeof(ASTNode));
+ASTNode* create_int_node(Arena *arena, int val) {
+    ASTNode *node = arena_push(arena, sizeof(ASTNode));
     if(node == NULL) { return NULL; }
 
     node->type = NODE_INT;
@@ -11,8 +12,8 @@ ASTNode* create_int_node(int val) {
     return node;
 }
 
-ASTNode* create_binary_op_node(NodeType type, ASTNode *left, ASTNode *right) {
-    ASTNode *node = malloc(sizeof(ASTNode));
+ASTNode* create_binary_op_node(Arena *arena, NodeType type, ASTNode *left, ASTNode *right) {
+    ASTNode *node = arena_push(arena, sizeof(ASTNode));
     if(node == NULL) { return NULL; }
 
     node->type = type;
@@ -21,8 +22,8 @@ ASTNode* create_binary_op_node(NodeType type, ASTNode *left, ASTNode *right) {
     return node;
 }
 
-ASTNode* create_unary_op_node(NodeType type, ASTNode *operand) {
-    ASTNode* node = malloc(sizeof(ASTNode));
+ASTNode* create_unary_op_node(Arena *arena, NodeType type, ASTNode *operand) {
+    ASTNode* node = arena_push(arena, sizeof(ASTNode));
     if(node == NULL) { return NULL; }
 
     node->type = type;
@@ -85,14 +86,14 @@ void ast_to_string(ASTNode *node) {
     }
 }
 
-void free_ast(ASTNode *node) {
-    if(!node) return;
+// void free_ast(ASTNode *node) {
+//     if(!node) return;
 
-    if(node->type == NODE_NEG) {
-        free_ast(node->data.unary.operand);
-    } else if(node->type != NODE_INT) {
-        free_ast(node->data.op.left);
-        free_ast(node->data.op.right);
-    }
-    free(node);
-}
+//     if(node->type == NODE_NEG) {
+//         free_ast(node->data.unary.operand);
+//     } else if(node->type != NODE_INT) {
+//         free_ast(node->data.op.left);
+//         free_ast(node->data.op.right);
+//     }
+//     free(node);
+// }
