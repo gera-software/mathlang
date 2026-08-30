@@ -1,7 +1,37 @@
 #include <criterion/criterion.h>
 #include "lexer.h"
 
-Test(lexer_suite, empty_input) {
+Test(peek, should_peek_char) {
+    Lexer lexer = {
+        .source = "(3+4)*5",
+        .cursor = 0,
+    };
+
+    char c0 = lexer_peek(&lexer, 0);
+    cr_assert_eq(c0, '(');
+
+    char c1 = lexer_peek(&lexer, 1);
+    cr_assert_eq(c1, '3');
+
+    cr_assert_eq(lexer.cursor, 0);
+}
+
+Test(consume, should_consume_char) {
+    Lexer lexer = {
+        .source = "(3+4)*5",
+        .cursor = 0,
+    };
+
+    char c0 = lexer_consume(&lexer);
+    cr_assert_eq(c0, '(');
+
+    char c1 = lexer_consume(&lexer);
+    cr_assert_eq(c1, '3');
+
+    cr_assert_eq(lexer.cursor, 2);
+}
+
+Test(next_token, empty_input) {
     Lexer lexer = {
         .source = "",
         .cursor = 0,
@@ -11,10 +41,9 @@ Test(lexer_suite, empty_input) {
 
     cr_assert_eq(token.type, END);
     cr_assert_eq(token.value, 0);
-    cr_assert_eq(token.column, 0);
 }
 
-Test(lexer_suite, operators) {
+Test(next_token, operators) {
     Lexer lexer = {
         .source = "+-*/",
         .cursor = 0,
@@ -28,26 +57,21 @@ Test(lexer_suite, operators) {
 
     cr_assert_eq(token0.type, PLUS);
     cr_assert_eq(token0.value, 0);
-    cr_assert_eq(token0.column, 0);
 
     cr_assert_eq(token1.type, MINUS);
     cr_assert_eq(token1.value, 0);
-    cr_assert_eq(token1.column, 1);
 
     cr_assert_eq(token2.type, STAR);
     cr_assert_eq(token2.value, 0);
-    cr_assert_eq(token2.column, 2);
 
     cr_assert_eq(token3.type, SLASH);
     cr_assert_eq(token3.value, 0);
-    cr_assert_eq(token3.column, 3);
 
     cr_assert_eq(token4.type, END);
     cr_assert_eq(token4.value, 0);
-    cr_assert_eq(token4.column, 4);
 }
 
-Test(lexer_suite, parentheses) {
+Test(next_token, parentheses) {
     Lexer lexer = {
         .source = "()",
         .cursor = 0,
@@ -59,18 +83,15 @@ Test(lexer_suite, parentheses) {
 
     cr_assert_eq(token0.type, LPAREN);
     cr_assert_eq(token0.value, 0);
-    cr_assert_eq(token0.column, 0);
 
     cr_assert_eq(token1.type, RPAREN);
     cr_assert_eq(token1.value, 0);
-    cr_assert_eq(token1.column, 1);
 
     cr_assert_eq(token2.type, END);
     cr_assert_eq(token2.value, 0);
-    cr_assert_eq(token2.column, 2);
 }
 
-Test(lexer_suite, single_digit_number) {
+Test(next_token, single_digit_number) {
     Lexer lexer = {
         .source = "5",
         .cursor = 0,
@@ -81,14 +102,12 @@ Test(lexer_suite, single_digit_number) {
 
     cr_assert_eq(token0.type, NUMBER);
     cr_assert_eq(token0.value, 5);
-    cr_assert_eq(token0.column, 0);
 
     cr_assert_eq(token1.type, END);
     cr_assert_eq(token1.value, 0);
-    cr_assert_eq(token1.column, 1);
 }
 
-Test(lexer_suite, multi_digit_number) {
+Test(next_token, multi_digit_number) {
     Lexer lexer = {
         .source = "0123450",
         .cursor = 0,
@@ -99,14 +118,12 @@ Test(lexer_suite, multi_digit_number) {
 
     cr_assert_eq(token0.type, NUMBER);
     cr_assert_eq(token0.value, 123450);
-    cr_assert_eq(token0.column, 0);
 
     cr_assert_eq(token1.type, END);
     cr_assert_eq(token1.value, 0);
-    cr_assert_eq(token1.column, 7);
 }
 
-Test(lexer_suite, whitespace_skipping) {
+Test(next_token, whitespace_skipping) {
     Lexer lexer = {
         .source = " 12 + 34 ",
         .cursor = 0,
@@ -119,22 +136,18 @@ Test(lexer_suite, whitespace_skipping) {
 
     cr_assert_eq(token0.type, NUMBER);
     cr_assert_eq(token0.value, 12);
-    cr_assert_eq(token0.column, 1);
 
     cr_assert_eq(token1.type, PLUS);
     cr_assert_eq(token1.value, 0);
-    cr_assert_eq(token1.column, 4);
 
     cr_assert_eq(token2.type, NUMBER);
     cr_assert_eq(token2.value, 34);
-    cr_assert_eq(token2.column, 6);
 
     cr_assert_eq(token3.type, END);
     cr_assert_eq(token3.value, 0);
-    cr_assert_eq(token3.column, 9);
 }
 
-Test(lexer_suite, invalid_character) {
+Test(next_token, invalid_character) {
     Lexer lexer = {
         .source = "2 $ 3",
         .cursor = 0,
@@ -147,22 +160,18 @@ Test(lexer_suite, invalid_character) {
 
     cr_assert_eq(token0.type, NUMBER);
     cr_assert_eq(token0.value, 2);
-    cr_assert_eq(token0.column, 0);
 
     cr_assert_eq(token1.type, INVALID);
     cr_assert_eq(token1.value, 0);
-    cr_assert_eq(token1.column, 2);
 
     cr_assert_eq(token2.type, NUMBER);
     cr_assert_eq(token2.value, 3);
-    cr_assert_eq(token2.column, 4);
 
     cr_assert_eq(token3.type, END);
     cr_assert_eq(token3.value, 0);
-    cr_assert_eq(token3.column, 5);
 }
 
-Test(lexer_suite, mixed_expression) {
+Test(next_token, mixed_expression) {
     Lexer lexer = {
         .source = "(3+4)*5",
         .cursor = 0,
@@ -179,33 +188,25 @@ Test(lexer_suite, mixed_expression) {
 
     cr_assert_eq(token0.type, LPAREN);
     cr_assert_eq(token0.value, 0);
-    cr_assert_eq(token0.column, 0);
 
     cr_assert_eq(token1.type, NUMBER);
     cr_assert_eq(token1.value, 3);
-    cr_assert_eq(token1.column, 1);
 
     cr_assert_eq(token2.type, PLUS);
     cr_assert_eq(token2.value, 0);
-    cr_assert_eq(token2.column, 2);
 
     cr_assert_eq(token3.type, NUMBER);
     cr_assert_eq(token3.value, 4);
-    cr_assert_eq(token3.column, 3);
 
     cr_assert_eq(token4.type, RPAREN);
     cr_assert_eq(token4.value, 0);
-    cr_assert_eq(token4.column, 4);
 
     cr_assert_eq(token5.type, STAR);
     cr_assert_eq(token5.value, 0);
-    cr_assert_eq(token5.column, 5);
 
     cr_assert_eq(token6.type, NUMBER);
     cr_assert_eq(token6.value, 5);
-    cr_assert_eq(token6.column, 6);
 
     cr_assert_eq(token7.type, END);
     cr_assert_eq(token7.value, 0);
-    cr_assert_eq(token7.column, 7);
 }

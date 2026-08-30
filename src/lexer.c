@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include <stdlib.h>
+#include "str_buf.h"
 
 bool is_digit(char c) {
     switch(c) {
@@ -28,45 +29,65 @@ bool is_space(char c) {
     }
 }
 
+char lexer_peek(Lexer *lexer, size_t offset) {
+    return lexer->source[lexer->cursor + offset];
+}
+
+char lexer_consume(Lexer *lexer) {
+    return lexer->source[lexer->cursor++];
+}
+
 Token lexer_next_token(Lexer* lexer) {
-    while(lexer->source[lexer->cursor] != '\0' && is_space(lexer->source[lexer->cursor])) {
-        lexer->cursor++;
+    // white space skipping
+    while(lexer_peek(lexer, 0) != '\0' && is_space(lexer_peek(lexer, 0))) {
+        lexer_consume(lexer);
     }
 
-    char current = lexer->source[lexer->cursor];
+    char peek = lexer_peek(lexer, 0);
 
-    if(current == '\0') return (Token){ END, 0, lexer->cursor++ }; 
+    // end of string
+    if(peek == '\0') {
+        lexer_consume(lexer);
+        return (Token){ END, 0 }; 
+    }
 
-    // lexer->cursor++;
+    // digits
+    if(is_digit(peek)) {
+        StrBuf string_buf = {0};
+        sb_init(&string_buf, 10);
 
-    switch(current) {
+        while(lexer_peek(lexer, 0) != '\0' && is_digit(lexer_peek(lexer, 0))) {
+            sb_append_char(&string_buf, lexer_consume(lexer));
+        }
+        int val = (int) strtol(sb_cstr(&string_buf), NULL, 10);
+    
+        sb_free(&string_buf);
+        return (Token){ NUMBER, val };
+    }
+
+    // operators
+    switch(peek) {
         case '+':
-            return (Token) { PLUS, 0, lexer->cursor++ };
+            lexer_consume(lexer);
+            return (Token) { PLUS, 0 };
         case '-':
-            return (Token) { MINUS, 0, lexer->cursor++ };
+            lexer_consume(lexer);
+            return (Token) { MINUS, 0 };
         case '*':
-            return (Token) { STAR, 0, lexer->cursor++ };
+            lexer_consume(lexer);
+            return (Token) { STAR, 0 };
         case '/':
-            return (Token) { SLASH, 0, lexer->cursor++ };
+            lexer_consume(lexer);
+            return (Token) { SLASH, 0 };
         case '(':
-            return (Token) { LPAREN, 0, lexer->cursor++ };
+            lexer_consume(lexer);
+            return (Token) { LPAREN, 0 };
         case ')':
-            return (Token) { RPAREN, 0, lexer->cursor++ };
+            lexer_consume(lexer);
+            return (Token) { RPAREN, 0 };
+        default:
+            lexer_consume(lexer);
+            return (Token){ INVALID, 0 };
     }
 
-    if(is_digit(current)) {
-        // lexer->cursor--; // Step back to read full number
-        size_t start_pos = lexer->cursor;
-        char* endptr;
-
-        long val = strtol(&lexer->source[lexer->cursor], &endptr, 10); // Base 10 conversion
-        // printf("%p: -%c-, ", (void*) &lexer->source[lexer->cursor], lexer->source[lexer->cursor]);
-        // printf("%p: -%c-, ", (void*) endptr, *endptr);
-        // if (*endptr != '\0') { printf("Unconverted trailing text: |%s|\n", endptr); }
-        lexer->cursor += (endptr - &lexer->source[lexer->cursor]);
-        // printf("cursor: %lu\n", lexer->cursor);
-        return (Token){ NUMBER, (int)val, start_pos};
-    }
-
-    return (Token){ INVALID, 0, lexer->cursor++ };
 }
