@@ -1,6 +1,7 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -g -Iinclude 
+VALGRIND = valgrind
 # Implicit rules: Make knows how to compile .c → .o. Since CFLAGS includes -Iinclude, headers are found.
 
 # Library sources (all .c except main.c)
@@ -20,7 +21,7 @@ MAIN_BIN = mathlang
 TEST_BIN = test_runner
 
 # Phony targets
-.PHONY: all test run clean
+.PHONY: all test run clean valgrind
 
 # Default target
 all: $(MAIN_BIN)
@@ -32,6 +33,10 @@ $(MAIN_BIN): $(LIB_OBJ) $(MAIN_OBJ)
 # Build and run tests
 test: $(TEST_BIN)
 	./$(TEST_BIN)
+
+# Run tests under Valgrind to check for leaks and memory errors
+valgrind: $(TEST_BIN)
+	$(VALGRIND) --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(TEST_BIN)
 
 # Build test binary (link Criterion)
 $(TEST_BIN): $(LIB_OBJ) $(TEST_OBJ)

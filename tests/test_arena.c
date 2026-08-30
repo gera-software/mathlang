@@ -211,6 +211,36 @@ Test(arena_push_array_zero, should_ignore_null_arena) {
     cr_assert_null(numbers);
 }
 
+Test(arena_suite, should_release_arena_without_leak_on_valgrind) {
+    Arena *arena = arena_alloc(64);
+    cr_assert_not_null(arena);
+
+    int *numbers = arena_push_array(arena, int, 4);
+    cr_assert_not_null(numbers);
+    numbers[0] = 1;
+    numbers[1] = 2;
+    numbers[2] = 3;
+    numbers[3] = 4;
+
+    arena_release(arena);
+    cr_assert(true);
+}
+
+Test(arena_suite, should_clear_and_release_arena_without_leak_on_valgrind) {
+    Arena *arena = arena_alloc(64);
+    cr_assert_not_null(arena);
+
+    char *text = arena_push(arena, 16);
+    cr_assert_not_null(text);
+    memcpy(text, "hello world", 11);
+
+    arena_clear(arena);
+    cr_assert_eq(arena->length, 0);
+
+    arena_release(arena);
+    cr_assert(true);
+}
+
 Test(arena_push_struct, should_allocate_struct) {
     typedef struct TestPoint {
         int x;
