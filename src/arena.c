@@ -31,3 +31,9 @@ void arena_release(Arena *arena) {
     arena->length = 0;
     free(arena);
 }
+
+void *arena_push(Arena *arena, size_t bytes) {
+    char *pos = (arena->buffer + arena->length);
+    arena->length += bytes;
+    return pos;
+}
