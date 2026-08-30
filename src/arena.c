@@ -1,5 +1,6 @@
 #include "arena.h"
 #include <stdlib.h>
+#include <string.h>
 
 Arena *arena_alloc(size_t capacity) {
     Arena *arena = malloc(sizeof(Arena));
@@ -33,7 +34,29 @@ void arena_release(Arena *arena) {
 }
 
 void *arena_push(Arena *arena, size_t bytes) {
-    char *pos = (arena->buffer + arena->length);
+    if (arena == NULL || arena->buffer == NULL) {
+        return NULL;
+    }
+
+    if (bytes == 0) {
+        return arena->buffer + arena->length;
+    }
+
+    if (arena->length > arena->capacity || bytes > (arena->capacity - arena->length)) {
+        return NULL;
+    }
+
+    char *pos = arena->buffer + arena->length;
     arena->length += bytes;
     return pos;
+}
+
+void *arena_push_zero(Arena *arena, size_t bytes) {
+    char *ptr = arena_push(arena, bytes);
+    if (ptr == NULL) {
+        return NULL;
+    }
+
+    memset(ptr, 0, bytes);
+    return ptr;
 }
