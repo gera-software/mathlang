@@ -2,31 +2,47 @@
 #include <stddef.h>
 
 typedef struct Arena {
-    char *buffer;
-    size_t capacity;
-    size_t length;
+    char *buffer;   /* contiguous backing store */
+    size_t capacity; /* total bytes in the buffer */
+    size_t length;   /* current used bytes / bump offset */
 } Arena;
 
-// create or destroy a 'stack' - an "arena"
+/*
+ * Allocate and initialize an arena with a fixed byte capacity.
+ * Returns NULL on allocation failure or when capacity is zero.
+ */
 Arena *arena_alloc(size_t capacity);
+
+/*
+ * Release the backing buffer and destroy the arena object.
+ * Safe to call with NULL.
+ */
 void arena_release(Arena *arena);
 
-// push some bytes onto the 'stack' - the way to allocate
+/*
+ * Push `bytes` bytes onto the arena and return a pointer to the newly reserved
+ * region. The memory is uninitialized. Returns NULL if the arena is invalid or
+ * if the request would exceed the remaining capacity.
+ */
 void *arena_push(Arena *arena, size_t bytes);
+
+/*
+ * Like arena_push, but zeroes the newly allocated memory range before returning.
+ */
 void *arena_push_zero(Arena *arena, size_t bytes);
 
-// some macro helpers that I've found nice:
+/*
+ * Convenience helpers for typed allocations.
+ * arena_push_array(arena, int, 8) allocates 8 ints.
+ * arena_push_struct(arena, MyType) allocates a single MyType.
+ */
 #define arena_push_array(arena, type, count) ((type *)arena_push((arena), sizeof(type) * (count)))
 #define arena_push_array_zero(arena, type, count) ((type *)arena_push_zero((arena), sizeof(type) * (count)))
 #define arena_push_struct(arena, type) ((type *)arena_push((arena), sizeof(type)))
 #define arena_push_struct_zero(arena, type) ((type *)arena_push_zero((arena), sizeof(type)))
 
-// pop some bytes off the 'stack' - the way to free
-// void arena_pop(Arena *arena, size_t bytes);
-
-// get the # of bytes currently allocated.
-// size_t arena_get_pos(Arena *arena);
-
-// also some useful popping helpers:
-// void arena_set_pos_back(Arena *arena, size_t pos);
+/*
+ * Rewind the arena by resetting its current used length to zero.
+ * The backing storage remains allocated and may be reused for new allocations.
+ */
 void arena_clear(Arena *arena);

@@ -73,8 +73,86 @@ sb_free(&src);
 sb_free(&dst);
 ```
 
+Arena usage and examples
+------------------------
+
+The arena is a simple bump allocator. It stores a contiguous byte buffer and
+tracks the current write offset with `Arena.length`. New allocations always
+append at the current end of the buffer; calling `arena_clear()` rewinds the
+write position back to zero without freeing the backing storage.
+
+Example: allocate and write a string
+
+```c
+Arena *arena = arena_alloc(256);
+if (arena == NULL) {
+    /* allocation failed */
+}
+
+char *message = arena_push(arena, 6);
+if (message == NULL) {
+    /* not enough capacity */
+}
+
+memcpy(message, "hello\0", 6);
+puts(message);
+
+arena_clear(arena);
+arena_release(arena);
+```
+
+Example: zero-initialized array or struct
+
+```c
+Arena *arena = arena_alloc(512);
+if (arena == NULL) {
+    /* allocation failed */
+}
+
+int *numbers = arena_push_array_zero(arena, int, 8);
+if (numbers == NULL) {
+    /* insufficient space */
+}
+
+for (int i = 0; i < 8; ++i) {
+    printf("%d\n", numbers[i]);
+}
+
+typedef struct Point {
+    int x;
+    int y;
+} Point;
+
+Point *p = arena_push_struct_zero(arena, Point);
+if (p != NULL) {
+    p->x = 10;
+    p->y = 20;
+}
+
+arena_release(arena);
+```
+
 Notes and tips
 --------------
+
+- `arena_alloc` returns NULL if capacity is zero or if memory allocation fails.
+
+- `arena_push` and `arena_push_zero` return NULL when the arena is NULL, the
+  backing buffer is NULL, or the requested size would exceed remaining capacity.
+
+- `arena_clear` resets the write offset (`Arena.length`) to zero; it does not
+  free the buffer or shrink the capacity. This makes it cheap to reuse the same
+  arena for a new pass of allocations.
+
+- `arena_release` frees the arena buffer and then frees the Arena object itself.
+  It is safe to call with NULL.
+
+- `arena_push_array` and `arena_push_struct` are convenience helpers for typed
+  allocations. Their zeroed variants (`arena_push_array_zero` and
+  `arena_push_struct_zero`) zero the allocated memory before returning it.
+
+- The arena is not thread-safe. If multiple threads access the same arena,
+  protect it with a mutex or other synchronization.
 
 - sb_cstr returns a pointer to the internal buffer (non-owning). The caller
   must not free the returned pointer.
