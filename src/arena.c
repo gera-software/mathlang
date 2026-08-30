@@ -60,3 +60,14 @@ void *arena_push_zero(Arena *arena, size_t bytes) {
     memset(ptr, 0, bytes);
     return ptr;
 }
+
+void arena_clear(Arena *arena) {
+    if(arena == NULL) {
+        return;
+    }
+    if(arena->buffer == NULL) {
+        return;
+    }
+
+    arena->length = 0;
+}

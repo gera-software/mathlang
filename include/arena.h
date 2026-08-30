@@ -22,11 +22,11 @@ void *arena_push_zero(Arena *arena, size_t bytes);
 // #define PushStructZero(arena, type) PushArrayZero((arena), (type), 1)
 
 // pop some bytes off the 'stack' - the way to free
-void arena_pop(Arena *arena, size_t bytes);
+// void arena_pop(Arena *arena, size_t bytes);
 
 // get the # of bytes currently allocated.
-size_t arena_get_pos(Arena *arena);
+// size_t arena_get_pos(Arena *arena);
 
 // also some useful popping helpers:
-void arena_set_pos_back(Arena *arena, size_t pos);
+// void arena_set_pos_back(Arena *arena, size_t pos);
 void arena_clear(Arena *arena);

@@ -106,3 +106,43 @@ Test(arena_push_zero, should_zero_new_memory) {
 
     arena_release(arena);
 }
+
+Test(arena_clear, should_reset_used_length_to_zero) {
+    Arena *arena = arena_alloc(32);
+    int *value = arena_push(arena, sizeof(int));
+
+    cr_assert_not_null(value);
+    *value = 42;
+    cr_expect_eq(arena->length, sizeof(int));
+
+    arena_clear(arena);
+
+    cr_expect_eq(arena->length, 0);
+    cr_expect_not_null(arena->buffer);
+    cr_expect_eq(arena->capacity, 32);
+
+    arena_release(arena);
+}
+
+Test(arena_clear, should_allow_reusing_the_arena_after_reset) {
+    Arena *arena = arena_alloc(16);
+    int *first = arena_push(arena, sizeof(int));
+    cr_assert_not_null(first);
+    *first = 123;
+
+    arena_clear(arena);
+
+    int *second = arena_push(arena, sizeof(int));
+    cr_assert_not_null(second);
+    *second = 456;
+
+    cr_expect_eq(*second, 456);
+    cr_expect_eq(arena->length, sizeof(int));
+
+    arena_release(arena);
+}
+
+Test(arena_clear, should_ignore_null_pointer) {
+    arena_clear(NULL);
+    cr_assert(true);
+}
