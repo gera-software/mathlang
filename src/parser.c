@@ -48,26 +48,36 @@ ASTNode* parse_factor(Arena* arena, Parser* parser) {
 }
 
 ASTNode* parse_term(Arena* arena, Parser* parser) {
-    ASTNode* factor_node1 = parse_factor(arena, parser);
-    if(factor_node1 == NULL) {
+    ASTNode* factor_node_left = parse_factor(arena, parser);
+    if(factor_node_left == NULL) {
         printf("Expected FACTOR\n");
         return NULL;
     }
-    
-    Token* peek = parser_peek(parser, 0);
-    if(peek->type == TOKEN_STAR || peek->type == TOKEN_SLASH) {
-        Token *token = parser_consume(parser);
 
-        ASTNode* factor_node2 = parse_factor(arena, parser);
-        if(factor_node2 == NULL) {
-            printf("Expected FACTOR\n");
-            return NULL;
+    Token* peek = NULL;
+    while(true) {
+        // TODO safe guard for out of bound access
+        peek = parser_peek(parser, 0);
+        if(peek->type == TOKEN_END) {
+            break;
         }
 
-        return create_binary_op_node(arena, token->type == TOKEN_STAR ? NODE_MUL : NODE_DIV, factor_node1, factor_node2);
-    } else {
-        return factor_node1;
+        if(peek->type == TOKEN_STAR || peek->type == TOKEN_SLASH) {
+            Token *token = parser_consume(parser);
+
+            ASTNode* factor_node_right = parse_factor(arena, parser);
+            if(factor_node_right == NULL) {
+                printf("Expected FACTOR\n");
+                return NULL;
+            }
+
+            factor_node_left = create_binary_op_node(arena, token->type == TOKEN_STAR ? NODE_MUL : NODE_DIV, factor_node_left, factor_node_right);
+        } else {
+            break;
+        }
+
     }
+    return factor_node_left;
 }
 
 // TODO

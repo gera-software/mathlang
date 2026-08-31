@@ -1,6 +1,7 @@
 #include <criterion/criterion.h>
 #include "parser.h"
 #include "arena.h"
+#include "ast.h"
 
 Test(peek, should_peek_token) {
     Token array[] = { 
@@ -221,6 +222,9 @@ Test(_parse_term, should_return_number) {
             .type = TOKEN_NUMBER,
             .value = 100,
         },
+        {
+            .type = TOKEN_END,
+        }
     }; 
     Parser parser = {
         .tokens = array,
@@ -250,6 +254,9 @@ Test(_parse_term, should_return_multiplication_op) {
             .type = TOKEN_NUMBER,
             .value = 5,
         },
+        {
+            .type = TOKEN_END,
+        }
     }; 
     Parser parser = {
         .tokens = array,
@@ -280,6 +287,9 @@ Test(_parse_term, should_return_division_op) {
             .type = TOKEN_NUMBER,
             .value = 5,
         },
+        {
+            .type = TOKEN_END,
+        },
     }; 
     Parser parser = {
         .tokens = array,
@@ -292,5 +302,49 @@ Test(_parse_term, should_return_division_op) {
     cr_expect_eq(expected0->data.op.right->data.value, 5);
 
     cr_assert_eq(parser.cursor, 3);
+    arena_release(arena);
+}
+
+Test(_parse_term, should_return_associativity_tree) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 10,
+        },
+        {
+            .type = TOKEN_STAR,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 5,
+        },
+        {
+            .type = TOKEN_SLASH,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 2,
+        },
+        {
+            .type = TOKEN_END,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_term(arena, &parser);
+    print_ast(expected0, 0);
+    ast_to_string(expected0);
+    cr_expect_eq(expected0->type, NODE_DIV);
+    cr_expect_eq(expected0->data.op.left->type, NODE_MUL);
+    cr_expect_eq(expected0->data.op.left->data.op.left->data.value, 10);
+    cr_expect_eq(expected0->data.op.left->data.op.right->data.value, 5);
+    cr_expect_eq(expected0->data.op.right->data.value, 2);
+
+    cr_assert_eq(parser.cursor, 5);
     arena_release(arena);
 }
