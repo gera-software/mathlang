@@ -80,6 +80,38 @@ ASTNode* parse_term(Arena* arena, Parser* parser) {
     return factor_node_left;
 }
 
+ASTNode* parse_expression(Arena* arena, Parser* parser) {
+    ASTNode* term_node_left = parse_term(arena, parser);
+    if(term_node_left == NULL) {
+        printf("Expected TERM\n");
+        return NULL;
+    }
+
+    Token* peek = NULL;
+    while(true) {
+        // TODO safe guard for out of bound access
+        peek = parser_peek(parser, 0);
+        if(peek->type == TOKEN_END) {
+            break;
+        }
+
+        if(peek->type == TOKEN_PLUS || peek->type == TOKEN_MINUS) {
+            Token *token = parser_consume(parser);
+
+            ASTNode* term_node_right = parse_term(arena, parser);
+            if(term_node_right == NULL) {
+                printf("Expected TERM\n");
+                return NULL;
+            }
+
+            term_node_left = create_binary_op_node(arena, token->type == TOKEN_PLUS ? NODE_ADD : NODE_SUB, term_node_left, term_node_right);
+        } else {
+            break;
+        }
+    }
+    return term_node_left;
+}
+
 // TODO
 ASTNode* parse(Parser* parser) {
     return NULL;
