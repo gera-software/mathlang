@@ -135,11 +135,29 @@ static void sb_append_bytes(StrBuf *sb, const char *data, size_t len) {
     sb->data[sb->length] = '\0';
 }
 
+void sb_append_int(StrBuf *sb, int i) {
+    if (sb == NULL) {
+        return;
+    }
+
+    char buf[32];
+    int written = snprintf(buf, sizeof(buf), "%d", i);
+    if (written < 0) {
+        return;
+    }
+
+    sb_append_bytes(sb, buf, (size_t)written);
+}
+
 void sb_append_char(StrBuf *sb, char c) {
     sb_append_bytes(sb, &c, 1);
 }
 
 void sb_append(StrBuf *sb, const char *str) {
+    if (sb == NULL || str == NULL) {
+        return;
+    }
+
     sb_append_bytes(sb, str, strlen(str));
 }
 

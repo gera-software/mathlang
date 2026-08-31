@@ -116,6 +116,17 @@ void sb_append(StrBuf *sb, const char *str);
  */
 void sb_append_buf(StrBuf *dst, const StrBuf *src);
 
+/**
+ * @brief Append a signed decimal integer to the buffer.
+ *
+ * @param sb StrBuf pointer (may be NULL).
+ * @param i Integer to append.
+ *
+ * Behavior and failure modes are the same as sb_append_char: this function
+ * appends the decimal representation of `i` and is a no-op if `sb` is NULL.
+ */
+void sb_append_int(StrBuf *sb, int i);
+
 // void  sb_append_n(StrBuf *sb, const char *str, size_t n);
 // void  sb_appendf(StrBuf *sb, const char *fmt, ...);
 

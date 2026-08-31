@@ -247,6 +247,26 @@ Test(str_buf__append_buf, should_ignore_null_or_empty_source) {
     sb_free(&dst);
 }
 
+Test(str_buf__append_int, should_append_signed_decimal_values) {
+    StrBuf string = {0};
+    sb_init(&string, 8);
+
+    sb_append_int(&string, 0);
+    sb_append_int(&string, 42);
+    sb_append_int(&string, -7);
+
+    cr_expect_eq(string.length, 5);
+    cr_expect_geq(string.capacity, 5);
+    cr_expect_str_eq(string.data, "042-7");
+
+    sb_free(&string);
+}
+
+Test(str_buf__append_int, should_ignore_null_pointer) {
+    sb_append_int(NULL, 123);
+    cr_assert(true);
+}
+
 Test(str_buf__clear, should_reset_length_and_keep_capacity) {
     StrBuf string = {0};
     sb_init(&string, 8);
