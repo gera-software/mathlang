@@ -48,7 +48,7 @@ Token lexer_next_token(Lexer* lexer) {
     // end of string
     if(peek == '\0') {
         lexer_consume(lexer);
-        return (Token){ END, 0 }; 
+        return (Token){ TOKEN_END, 0 }; 
     }
 
     // digits
@@ -62,32 +62,32 @@ Token lexer_next_token(Lexer* lexer) {
         int val = (int) strtol(sb_cstr(&string_buf), NULL, 10);
     
         sb_free(&string_buf);
-        return (Token){ NUMBER, val };
+        return (Token){ TOKEN_NUMBER, val };
     }
 
     // operators
     switch(peek) {
         case '+':
             lexer_consume(lexer);
-            return (Token) { PLUS, 0 };
+            return (Token) { TOKEN_PLUS, 0 };
         case '-':
             lexer_consume(lexer);
-            return (Token) { MINUS, 0 };
+            return (Token) { TOKEN_MINUS, 0 };
         case '*':
             lexer_consume(lexer);
-            return (Token) { STAR, 0 };
+            return (Token) { TOKEN_STAR, 0 };
         case '/':
             lexer_consume(lexer);
-            return (Token) { SLASH, 0 };
+            return (Token) { TOKEN_SLASH, 0 };
         case '(':
             lexer_consume(lexer);
-            return (Token) { LPAREN, 0 };
+            return (Token) { TOKEN_LPAREN, 0 };
         case ')':
             lexer_consume(lexer);
-            return (Token) { RPAREN, 0 };
+            return (Token) { TOKEN_RPAREN, 0 };
         default:
             lexer_consume(lexer);
-            return (Token){ INVALID, 0 };
+            return (Token){ TOKEN_INVALID, 0 };
     }
 
 }

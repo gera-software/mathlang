@@ -3,15 +3,15 @@
 #include <stdbool.h>
 
 typedef enum TokenType {
-    NUMBER,
-    PLUS,
-    MINUS,
-    STAR,
-    SLASH,
-    LPAREN,
-    RPAREN,
-    END,
-    INVALID,
+    TOKEN_NUMBER,
+    TOKEN_PLUS,
+    TOKEN_MINUS,
+    TOKEN_STAR,
+    TOKEN_SLASH,
+    TOKEN_LPAREN,
+    TOKEN_RPAREN,
+    TOKEN_END,
+    TOKEN_INVALID,
 } TokenType;
 
 typedef struct Token {

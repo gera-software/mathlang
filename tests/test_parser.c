@@ -4,15 +4,15 @@
 Test(peek, should_peek_token) {
     Token array[] = { 
         {
-            .type = NUMBER,
+            .type = TOKEN_NUMBER,
             .value = 100,
         },
         {
-            .type = NUMBER,
+            .type = TOKEN_NUMBER,
             .value = 200,
         },
         {
-            .type = NUMBER,
+            .type = TOKEN_NUMBER,
             .value = 300,
         },
     }; 
@@ -22,11 +22,11 @@ Test(peek, should_peek_token) {
     };
 
     Token* expected0 = parser_peek(&parser, 0);
-    cr_expect_eq(expected0->type, NUMBER);
+    cr_expect_eq(expected0->type, TOKEN_NUMBER);
     cr_expect_eq(expected0->value, 100);
 
     Token* expected1 = parser_peek(&parser, 1);
-    cr_expect_eq(expected1->type, NUMBER);
+    cr_expect_eq(expected1->type, TOKEN_NUMBER);
     cr_expect_eq(expected1->value, 200);
 
     cr_assert_eq(parser.cursor, 0);
@@ -35,15 +35,15 @@ Test(peek, should_peek_token) {
 Test(consume, should_consume_token) {
     Token array[] = { 
         {
-            .type = NUMBER,
+            .type = TOKEN_NUMBER,
             .value = 100,
         },
         {
-            .type = NUMBER,
+            .type = TOKEN_NUMBER,
             .value = 200,
         },
         {
-            .type = NUMBER,
+            .type = TOKEN_NUMBER,
             .value = 300,
         },
     }; 
@@ -53,11 +53,11 @@ Test(consume, should_consume_token) {
     };
 
     Token* expected0 = parser_consume(&parser);
-    cr_expect_eq(expected0->type, NUMBER);
+    cr_expect_eq(expected0->type, TOKEN_NUMBER);
     cr_expect_eq(expected0->value, 100);
 
     Token* expected1 = parser_consume(&parser);
-    cr_expect_eq(expected1->type, NUMBER);
+    cr_expect_eq(expected1->type, TOKEN_NUMBER);
     cr_expect_eq(expected1->value, 200);
 
     cr_assert_eq(parser.cursor, 2);
