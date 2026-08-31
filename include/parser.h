@@ -11,4 +11,6 @@ typedef struct Parser {
 Token* parser_peek(Parser* parser, size_t offset);
 Token* parser_consume(Parser* parser);
 
+ASTNode* parse_number(Arena* arena, Parser* parser);
+
 ASTNode* parse(Parser* parser);
