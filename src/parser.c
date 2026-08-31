@@ -112,7 +112,6 @@ ASTNode* parse_expression(Arena* arena, Parser* parser) {
     return term_node_left;
 }
 
-// TODO
 ASTNode* parse(Parser* parser) {
     return NULL;
 }

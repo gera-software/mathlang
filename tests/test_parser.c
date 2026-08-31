@@ -499,3 +499,247 @@ Test(_parse_expression, should_return_associativity_tree) {
     sb_free(&sb);
     arena_release(arena);
 }
+
+Test(math, simple_number) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 42,
+        },
+        {
+            .type = TOKEN_END,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected = parse_expression(arena, &parser);
+
+    StrBuf sb = {0};
+    sb_init(&sb, 250);
+    ast_to_string(&sb, expected);
+
+    const char *cstr = sb_cstr(&sb);
+    cr_expect_str_eq(cstr, "42");
+
+    sb_free(&sb);
+    arena_release(arena);
+}
+
+Test(math, addition_left_associativity) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 10,
+        },
+        {
+            .type = TOKEN_MINUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 3,
+        },
+        {
+            .type = TOKEN_MINUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 2,
+        },
+        {
+            .type = TOKEN_END,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected = parse_expression(arena, &parser);
+
+    StrBuf sb = {0};
+    sb_init(&sb, 250);
+    ast_to_string(&sb, expected);
+
+    const char *cstr = sb_cstr(&sb);
+    cr_expect_str_eq(cstr, "((10 SUB 3) SUB 2)");
+
+    sb_free(&sb);
+    arena_release(arena);
+}
+
+Test(math, term_precedence) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 2,
+        },
+        {
+            .type = TOKEN_PLUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 3,
+        },
+        {
+            .type = TOKEN_STAR,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 4,
+        },
+        {
+            .type = TOKEN_END,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected = parse_expression(arena, &parser);
+
+    StrBuf sb = {0};
+    sb_init(&sb, 250);
+    ast_to_string(&sb, expected);
+
+    const char *cstr = sb_cstr(&sb);
+    cr_expect_str_eq(cstr, "(2 ADD (3 MUL 4))");
+
+    sb_free(&sb);
+    arena_release(arena);
+}
+
+Test(math, unary_minus) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_MINUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 3,
+        },
+        {
+            .type = TOKEN_PLUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 2,
+        },
+        {
+            .type = TOKEN_END,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected = parse_expression(arena, &parser);
+
+    StrBuf sb = {0};
+    sb_init(&sb, 250);
+    ast_to_string(&sb, expected);
+
+    const char *cstr = sb_cstr(&sb);
+    cr_expect_str_eq(cstr, "(( NEG 3) ADD 2)");
+
+    sb_free(&sb);
+    arena_release(arena);
+}
+
+Test(math, nested_unary_minus) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_MINUS,
+        },
+        {
+            .type = TOKEN_MINUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 5,
+        },
+        {
+            .type = TOKEN_END,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected = parse_expression(arena, &parser);
+
+    StrBuf sb = {0};
+    sb_init(&sb, 250);
+    ast_to_string(&sb, expected);
+
+    const char *cstr = sb_cstr(&sb);
+    cr_expect_str_eq(cstr, "( NEG ( NEG 5))");
+
+    sb_free(&sb);
+    arena_release(arena);
+}
+
+// Test(math, parethesis) {
+//     Arena *arena = arena_alloc(1024);
+
+//     Token array[] = { 
+//         {
+//             .type = TOKEN_LPAREN,
+//         },
+//         {
+//             .type = TOKEN_NUMBER,
+//             .value = 2,
+//         },
+//         {
+//             .type = TOKEN_PLUS,
+//         },
+//         {
+//             .type = TOKEN_NUMBER,
+//             .value = 3,
+//         },
+//         {
+//             .type = TOKEN_RPAREN,
+//         },
+//         {
+//             .type = TOKEN_STAR,
+//         },
+//         {
+//             .type = TOKEN_NUMBER,
+//             .value = 4,
+//         },
+//         {
+//             .type = TOKEN_END,
+//         },
+//     }; 
+//     Parser parser = {
+//         .tokens = array,
+//         .cursor = 0,
+//     };
+
+//     ASTNode* expected = parse_expression(arena, &parser);
+
+//     StrBuf sb = {0};
+//     sb_init(&sb, 250);
+//     ast_to_string(&sb, expected);
+
+//     const char *cstr = sb_cstr(&sb);
+//     cr_expect_str_eq(cstr, "((2 ADD 3) MUL 4)");
+
+//     sb_free(&sb);
+//     arena_release(arena);
+// }
