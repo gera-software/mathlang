@@ -12,6 +12,8 @@ typedef enum {
     NODE_NEG, // Menos Unário (-A)
 } NodeType;
 
+const char* get_node_type_name(NodeType type);
+
 typedef struct ASTNode {
     NodeType type;
     union {

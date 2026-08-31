@@ -40,19 +40,6 @@ void print_tabs(StrBuf *string_buf, int level) {
     }
 }
 
-// FIX pode retornar string de uma função sem alocação dinamica da string na heap?
-const char* get_node_type_name(NodeType type) {
-    switch(type) {
-        case NODE_INT: return "INT";
-        case NODE_ADD: return "ADD";
-        case NODE_SUB: return "SUB";
-        case NODE_MUL: return "MUL";
-        case NODE_DIV: return "DIV";
-        case NODE_NEG: return "NEG";
-        default: return "UNKNOWN";
-    }
-}
-
 void print_ast(StrBuf *string_buf, ASTNode *node, int level) {
     if(node == NULL) { return; }
 
@@ -95,6 +82,18 @@ void ast_to_string(StrBuf *string_buf, ASTNode *node) {
         sb_append(string_buf, " ");
         ast_to_string(string_buf, node->data.op.right);
         sb_append(string_buf, ")");
+    }
+}
+
+const char* get_node_type_name(NodeType type) {
+    switch(type) {
+        case NODE_INT: return "INT";
+        case NODE_ADD: return "ADD";
+        case NODE_SUB: return "SUB";
+        case NODE_MUL: return "MUL";
+        case NODE_DIV: return "DIV";
+        case NODE_NEG: return "NEG";
+        default: return "UNKNOWN";
     }
 }
 

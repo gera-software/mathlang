@@ -14,6 +14,8 @@ typedef enum TokenType {
     TOKEN_INVALID,
 } TokenType;
 
+const char* get_token_type_name(TokenType type);
+
 typedef struct Token {
     TokenType type;
     int value;
