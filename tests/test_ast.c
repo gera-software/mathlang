@@ -86,8 +86,15 @@ Test(ast_suite, should_pretty_print_ast) {
     
     ASTNode *root = create_binary_op_node(a, NODE_ADD, op2, op3);
     
-    ast_to_string(root);
-    printf("\n");
+    StrBuf string_buf = {0};
+    sb_init(&string_buf, 250);
     
+    ast_to_string(&string_buf, root);
+
+    const char *cstr = sb_cstr(&string_buf);
+    cr_expect_str_eq(cstr, "((( NEG 5) MUL 6) ADD (7 DIV 8))");
+
+
+    sb_free(&string_buf);
     arena_release(a);
 }

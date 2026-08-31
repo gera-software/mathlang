@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "ast.h"
 #include "arena.h"
+#include "str_buf.h"
 
 ASTNode* create_int_node(Arena *arena, int val) {
     ASTNode *node = arena_push(arena, sizeof(ASTNode));
@@ -67,22 +68,26 @@ void print_ast(ASTNode *node, int level) {
     }
 }
 
-void ast_to_string(ASTNode *node) {
+void ast_to_string(StrBuf *string_buf, ASTNode *node) {
     if(node == NULL) { return; }
 
     if(node->type == NODE_INT) {
-        printf("%d", node->data.value);
+        sb_append_int(string_buf, node->data.value);
     } else if(node->type == NODE_NEG) {
-        printf("(");
-        printf(" %s ", get_node_type_name(node->type));
-        ast_to_string(node->data.unary.operand);
-        printf(")");
+        sb_append(string_buf, "(");
+        sb_append(string_buf, " ");
+        sb_append(string_buf, get_node_type_name(node->type));
+        sb_append(string_buf, " ");
+        ast_to_string(string_buf, node->data.unary.operand);
+        sb_append(string_buf, ")");
     } else {
-        printf("(");
-        ast_to_string(node->data.op.left);
-        printf(" %s ", get_node_type_name(node->type));
-        ast_to_string(node->data.op.right);
-        printf(")");
+        sb_append(string_buf, "(");
+        ast_to_string(string_buf, node->data.op.left);
+        sb_append(string_buf, " ");
+        sb_append(string_buf, get_node_type_name(node->type));
+        sb_append(string_buf, " ");
+        ast_to_string(string_buf, node->data.op.right);
+        sb_append(string_buf, ")");
     }
 }
 

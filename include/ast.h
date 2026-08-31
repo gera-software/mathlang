@@ -1,6 +1,7 @@
 #pragma once
 
 #include "arena.h"
+#include "str_buf.h"
 
 typedef enum {
     NODE_INT, // Número inteiro
@@ -31,4 +32,4 @@ ASTNode* create_unary_op_node(Arena *arena, NodeType type, ASTNode *operand);
 // void free_ast(ASTNode *node);
 void print_ast(ASTNode *node, int level);
 
-void ast_to_string(ASTNode *node);
+void ast_to_string(StrBuf *string_buf, ASTNode *node);
