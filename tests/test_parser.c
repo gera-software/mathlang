@@ -337,8 +337,14 @@ Test(_parse_term, should_return_associativity_tree) {
     };
 
     ASTNode* expected0 = parse_term(arena, &parser);
-    print_ast(expected0, 0);
-    ast_to_string(expected0);
+
+    StrBuf sb = {0};
+    sb_init(&sb, 250);
+    ast_to_string(&sb, expected0);
+
+    const char *cstr = sb_cstr(&sb);
+    cr_expect_str_eq(cstr, "((10 MUL 5) DIV 2)");
+
     cr_expect_eq(expected0->type, NODE_DIV);
     cr_expect_eq(expected0->data.op.left->type, NODE_MUL);
     cr_expect_eq(expected0->data.op.left->data.op.left->data.value, 10);
@@ -346,5 +352,7 @@ Test(_parse_term, should_return_associativity_tree) {
     cr_expect_eq(expected0->data.op.right->data.value, 2);
 
     cr_assert_eq(parser.cursor, 5);
+
+    sb_free(&sb);
     arena_release(arena);
 }
