@@ -694,52 +694,52 @@ Test(math, nested_unary_minus) {
     arena_release(arena);
 }
 
-// Test(math, parethesis) {
-//     Arena *arena = arena_alloc(1024);
+Test(math, parentheses) {
+    Arena *arena = arena_alloc(1024);
 
-//     Token array[] = { 
-//         {
-//             .type = TOKEN_LPAREN,
-//         },
-//         {
-//             .type = TOKEN_NUMBER,
-//             .value = 2,
-//         },
-//         {
-//             .type = TOKEN_PLUS,
-//         },
-//         {
-//             .type = TOKEN_NUMBER,
-//             .value = 3,
-//         },
-//         {
-//             .type = TOKEN_RPAREN,
-//         },
-//         {
-//             .type = TOKEN_STAR,
-//         },
-//         {
-//             .type = TOKEN_NUMBER,
-//             .value = 4,
-//         },
-//         {
-//             .type = TOKEN_END,
-//         },
-//     }; 
-//     Parser parser = {
-//         .tokens = array,
-//         .cursor = 0,
-//     };
+    Token array[] = { 
+        {
+            .type = TOKEN_LPAREN,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 2,
+        },
+        {
+            .type = TOKEN_PLUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 3,
+        },
+        {
+            .type = TOKEN_RPAREN,
+        },
+        {
+            .type = TOKEN_STAR,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 4,
+        },
+        {
+            .type = TOKEN_END,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
 
-//     ASTNode* expected = parse_expression(arena, &parser);
+    ASTNode* expected = parse_expression(arena, &parser);
 
-//     StrBuf sb = {0};
-//     sb_init(&sb, 250);
-//     ast_to_string(&sb, expected);
+    StrBuf sb = {0};
+    sb_init(&sb, 250);
+    ast_to_string(&sb, expected);
 
-//     const char *cstr = sb_cstr(&sb);
-//     cr_expect_str_eq(cstr, "((2 ADD 3) MUL 4)");
+    const char *cstr = sb_cstr(&sb);
+    cr_expect_str_eq(cstr, "((2 ADD 3) MUL 4)");
 
-//     sb_free(&sb);
-//     arena_release(arena);
-// }
+    sb_free(&sb);
+    arena_release(arena);
+}

@@ -41,7 +41,27 @@ ASTNode* parse_factor(Arena* arena, Parser* parser) {
         return number;
     }
 
-    // TODO parse expression
+    // parse expression between parentheses
+    Token* peek = parser_peek(parser, 0);
+    if(peek->type == TOKEN_LPAREN) {
+        parser_consume(parser);
+
+        ASTNode* expression = parse_expression(arena, parser);
+        if(expression == NULL) {
+            printf("Expected EXPRESSION\n");
+            return NULL;
+        }
+
+        peek = parser_peek(parser, 0);
+        if(peek->type == TOKEN_RPAREN) {
+            parser_consume(parser);
+
+            return expression;
+        } else {
+            printf("Expected ')'\n");
+            return NULL;
+        }
+    }
 
     ASTNode* unary_minus = parse_unary_minus(arena, parser);
     return unary_minus;
