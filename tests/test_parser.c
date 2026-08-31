@@ -117,3 +117,180 @@ Test(_parse_number, should_return_null) {
     cr_assert_eq(parser.cursor, 0);
     arena_release(arena);
 }
+
+Test(_parse_unary_minus, should_return_negative_number_op) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_MINUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 100,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_unary_minus(arena, &parser);
+    cr_expect_eq(expected0->type, NODE_NEG);
+    cr_expect_eq(expected0->data.unary.operand->type, NODE_INT);
+    cr_expect_eq(expected0->data.unary.operand->data.value, 100);
+
+    cr_assert_eq(parser.cursor, 2);
+    arena_release(arena);
+}
+
+Test(_parse_unary_minus, should_return_null) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 100,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_unary_minus(arena, &parser);
+    cr_expect_eq(expected0, NULL);
+
+    cr_assert_eq(parser.cursor, 0);
+    arena_release(arena);
+}
+
+Test(_parse_factor, should_return_number_node) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 100,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_factor(arena, &parser);
+    cr_expect_eq(expected0->type, NODE_INT);
+    cr_expect_eq(expected0->data.value, 100);
+
+    cr_assert_eq(parser.cursor, 1);
+    arena_release(arena);
+}
+
+Test(_parse_factor, should_return_negative_number_op) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_MINUS,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 100,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_factor(arena, &parser);
+    cr_expect_eq(expected0->type, NODE_NEG);
+    cr_expect_eq(expected0->data.unary.operand->type, NODE_INT);
+    cr_expect_eq(expected0->data.unary.operand->data.value, 100);
+
+    cr_assert_eq(parser.cursor, 2);
+    arena_release(arena);
+}
+
+Test(_parse_term, should_return_number) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 100,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_term(arena, &parser);
+    cr_expect_eq(expected0->type, NODE_INT);
+    cr_expect_eq(expected0->data.value, 100);
+
+    cr_assert_eq(parser.cursor, 1);
+    arena_release(arena);
+}
+
+Test(_parse_term, should_return_multiplication_op) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 100,
+        },
+        {
+            .type = TOKEN_STAR,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 5,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_term(arena, &parser);
+    cr_expect_eq(expected0->type, NODE_MUL);
+    cr_expect_eq(expected0->data.op.left->data.value, 100);
+    cr_expect_eq(expected0->data.op.right->data.value, 5);
+
+    cr_assert_eq(parser.cursor, 3);
+    arena_release(arena);
+}
+
+Test(_parse_term, should_return_division_op) {
+    Arena *arena = arena_alloc(1024);
+
+    Token array[] = { 
+        {
+            .type = TOKEN_NUMBER,
+            .value = 100,
+        },
+        {
+            .type = TOKEN_SLASH,
+        },
+        {
+            .type = TOKEN_NUMBER,
+            .value = 5,
+        },
+    }; 
+    Parser parser = {
+        .tokens = array,
+        .cursor = 0,
+    };
+
+    ASTNode* expected0 = parse_term(arena, &parser);
+    cr_expect_eq(expected0->type, NODE_DIV);
+    cr_expect_eq(expected0->data.op.left->data.value, 100);
+    cr_expect_eq(expected0->data.op.right->data.value, 5);
+
+    cr_assert_eq(parser.cursor, 3);
+    arena_release(arena);
+}
