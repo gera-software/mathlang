@@ -32,9 +32,11 @@ ASTNode* create_unary_op_node(Arena *arena, NodeType type, ASTNode *operand) {
     return node;
 }
 
-void print_tabs(int level) {
+void print_tabs(StrBuf *string_buf, int level) {
+    // sb_append_int(string_buf, level);
     for(int i = 0; i < level; i++) {
-        printf("\t");
+        sb_append_char(string_buf, '\t');
+        // printf("\t");
     }
 }
 
@@ -51,19 +53,24 @@ const char* get_node_type_name(NodeType type) {
     }
 }
 
-void print_ast(ASTNode *node, int level) {
+void print_ast(StrBuf *string_buf, ASTNode *node, int level) {
     if(node == NULL) { return; }
 
-    print_tabs(level);
+    print_tabs(string_buf, level);
     if(node->type == NODE_INT) {
-        printf("%d\n", node->data.value);
+        sb_append_int(string_buf, node->data.value);
+        sb_append_char(string_buf, '\n');
+        // printf("%d\n", node->data.value);
     } else {
-        printf("<%s>\n", get_node_type_name(node->type));
+        sb_append_char(string_buf, '<');
+        sb_append(string_buf, get_node_type_name(node->type));
+        sb_append(string_buf, ">\n");
+        // printf("<%s>\n", get_node_type_name(node->type));
         if(node->type == NODE_NEG) {
-            print_ast(node->data.unary.operand, level + 1);
+            print_ast(string_buf, node->data.unary.operand, level + 1);
         } else {
-            print_ast(node->data.op.left, level + 1);
-            print_ast(node->data.op.right, level + 1);
+            print_ast(string_buf, node->data.op.left, level + 1);
+            print_ast(string_buf, node->data.op.right, level + 1);
         }
     }
 }

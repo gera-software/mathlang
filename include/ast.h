@@ -30,6 +30,6 @@ ASTNode* create_int_node(Arena *arena, int val);
 ASTNode* create_binary_op_node(Arena *arena, NodeType type, ASTNode *left, ASTNode *right);
 ASTNode* create_unary_op_node(Arena *arena, NodeType type, ASTNode *operand);
 // void free_ast(ASTNode *node);
-void print_ast(ASTNode *node, int level);
+void print_ast(StrBuf *string_buf, ASTNode *node, int level);
 
 void ast_to_string(StrBuf *string_buf, ASTNode *node);
