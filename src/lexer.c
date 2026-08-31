@@ -24,6 +24,8 @@ bool is_space(char c) {
     switch (c) {
         case ' ':
             return true;
+        case '\n':
+            return true;
         default:
             return false;
     }
