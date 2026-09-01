@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "repl.h"
 #include "lexer.h"
+#include "parser.h"
 
 void repl_start(void) {
     Arena *a = arena_alloc(1024);
@@ -11,6 +12,7 @@ void repl_start(void) {
     fgets(input, sizeof(input), stdin);
     // Actual loop comes later.
 
+    // TODO create lexer
     Lexer lexer = {
         .source = input,
         .cursor = 0,
@@ -18,11 +20,9 @@ void repl_start(void) {
 
     TokenList* token_list = create_token_list(a, 10);
 
-    // Lexer step
+    // TODO tokenize function 
     while(true) {
         Token token = lexer_next_token(&lexer);
-        printf("%s: <%d>\n", get_token_type_name(token.type), token.value);
-
         token_list_push(token_list, token);
 
         if(token.type == TOKEN_END) {
@@ -30,5 +30,21 @@ void repl_start(void) {
         }
     }
 
+    // TODO create parser
+    Parser parser = {
+        .tokens = token_list,
+        .cursor = 0,
+    };
+
+    // Parser step
+    ASTNode* ast = parse(a, &parser);
+
+
     printf("found %ld tokens\n", token_list->length);
+
+    StrBuf string_buf = {0};
+    sb_init(&string_buf, 250);
+    ast_to_string(&string_buf, ast);
+    printf("expression: %s\n", sb_cstr(&string_buf));
+
 }
