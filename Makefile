@@ -5,7 +5,7 @@ VALGRIND = valgrind
 # Implicit rules: Make knows how to compile .c → .o. Since CFLAGS includes -Iinclude, headers are found.
 
 # Library sources (all .c except main.c)
-LIB_SRC = src/str_buf.c src/arena.c src/repl.c src/lexer.c src/ast.c src/parser.c
+LIB_SRC = src/str_buf.c src/arena.c src/repl.c src/token.c src/lexer.c src/ast.c src/parser.c
 LIB_OBJ = $(LIB_SRC:.c=.o)
 
 # Main program sources (only main.c)

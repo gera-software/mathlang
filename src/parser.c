@@ -1,5 +1,6 @@
 #include "parser.h"
 
+// FIX out of bounds check
 Token* parser_peek(Parser* parser, size_t offset) {
     return &(parser->tokens[parser->cursor + offset]);
 }
