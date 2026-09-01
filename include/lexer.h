@@ -25,6 +25,8 @@ char lexer_consume(Lexer *lexer);
 
 Lexer* create_lexer(Arena *a, char *source);
 
+TokenList* tokenize(Arena* a, Lexer* lexer);
+
 bool is_digit(char c);
 
 bool is_space(char c);

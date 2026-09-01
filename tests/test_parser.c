@@ -497,6 +497,7 @@ Test(math, parentheses) {
 // Test(math, empty_input) {
 //     Arena *arena = arena_alloc(1024);
 
+//     TokenList* token_list = create_token_list(arena, 10);
 //      Parser* parser = create_parser(arena, token_list);
 
 //     ASTNode* root = parse(arena, parser);

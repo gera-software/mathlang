@@ -15,23 +15,11 @@ void repl_start(void) {
 
     Lexer* lexer = create_lexer(a, input);
 
-    TokenList* token_list = create_token_list(a, 10);
-
-    // TODO tokenize function 
-    while(true) {
-        Token token = lexer_next_token(lexer);
-        token_list_push(token_list, token);
-
-        if(token.type == TOKEN_END) {
-            break;
-        }
-    }
+    TokenList* token_list = tokenize(a, lexer);
 
     Parser* parser = create_parser(a, token_list);
 
-    // Parser step
     ASTNode* ast = parse(a, parser);
-
 
     printf("found %ld tokens\n", token_list->length);
 

@@ -221,3 +221,14 @@ Test(next_token, mixed_expression) {
 
     arena_release(a);
 }
+
+Test(tokenize_, should_return_final_token_list) {
+    Arena* a = arena_alloc(250);
+    Lexer* lexer = create_lexer(a, "(3+4)*5");
+
+    TokenList* token_list = tokenize(a, lexer);
+
+    cr_expect_not_null(token_list);
+
+    arena_release(a);
+}

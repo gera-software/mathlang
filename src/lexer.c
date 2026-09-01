@@ -107,3 +107,18 @@ Lexer* create_lexer(Arena* a, char* source) {
 
     return lexer;
 }
+
+TokenList* tokenize(Arena* a, Lexer* lexer) {
+    TokenList* token_list = create_token_list(a, 10);
+
+    while(true) {
+        Token token = lexer_next_token(lexer);
+        token_list_push(token_list, token);
+
+        if(token.type == TOKEN_END) {
+            break;
+        }
+    }
+
+    return token_list;
+}
