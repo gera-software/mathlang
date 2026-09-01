@@ -14,3 +14,18 @@ const char* get_token_type_name(TokenType type) {
         default: return "TOKEN_UNKNOWN";
     }
 }
+
+TokenList* create_token_list(Arena* a, size_t capacity) {
+    TokenList* token_list = arena_push(a, sizeof(TokenList));
+    if(token_list == NULL) {
+        return NULL;
+    }
+    token_list->list = arena_push_array(a, Token, capacity);
+    if(token_list->list == NULL) {
+        return NULL;
+    }
+    token_list->capacity = capacity;
+    token_list->length = 0;
+
+    return token_list;
+}

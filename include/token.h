@@ -1,4 +1,5 @@
 #pragma once
+#include "arena.h"
 
 typedef enum TokenType {
     TOKEN_NUMBER,
@@ -18,3 +19,14 @@ typedef struct Token {
     TokenType type;
     int value;
 } Token;
+
+
+typedef struct TokenList {
+    Token* list; /* contiguous backing store */
+    size_t capacity; /* total Tokens in the buffer */
+    size_t length; /* current used Tokens / bump offset */
+} TokenList;
+
+TokenList* create_token_list(Arena* a, size_t capacity);
+
+void token_list_push(Token token);
