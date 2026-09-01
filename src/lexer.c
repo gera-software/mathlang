@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include <stdlib.h>
 #include "str_buf.h"
+#include <string.h>
 
 bool is_digit(char c) {
     switch(c) {
@@ -93,4 +94,16 @@ Token lexer_next_token(Lexer* lexer) {
             return (Token){ TOKEN_INVALID, 0 };
     }
 
+}
+
+Lexer* create_lexer(Arena* a, char* source) {
+    char *string_p = arena_push(a, strlen(source) + 1);
+    strcpy(string_p, source);
+
+    Lexer* lexer = arena_push_struct(a, Lexer);
+
+    lexer->cursor = 0;
+    lexer->source = string_p;
+
+    return lexer;
 }

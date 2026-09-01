@@ -23,6 +23,8 @@ Token lexer_next_token(Lexer* lexer);
 char lexer_peek(Lexer *lexer, size_t offset);
 char lexer_consume(Lexer *lexer);
 
+Lexer* create_lexer(Arena *a, char *source);
+
 bool is_digit(char c);
 
 bool is_space(char c);

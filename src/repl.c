@@ -8,21 +8,19 @@ void repl_start(void) {
 
     char input[100];
     printf("MathLang REPL\n");
+    printf("Enter a math expression:\n");
     // printf("Type 'quit' to exit.\n");
     fgets(input, sizeof(input), stdin);
     // Actual loop comes later.
 
     // TODO create lexer
-    Lexer lexer = {
-        .source = input,
-        .cursor = 0,
-    };
+    Lexer* lexer = create_lexer(a, input);
 
     TokenList* token_list = create_token_list(a, 10);
 
     // TODO tokenize function 
     while(true) {
-        Token token = lexer_next_token(&lexer);
+        Token token = lexer_next_token(lexer);
         token_list_push(token_list, token);
 
         if(token.type == TOKEN_END) {

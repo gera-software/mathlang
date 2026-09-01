@@ -1,59 +1,68 @@
 #include <criterion/criterion.h>
 #include "lexer.h"
 
-Test(peek, should_peek_char) {
-    Lexer lexer = {
-        .source = "(3+4)*5",
-        .cursor = 0,
-    };
+Test(create_lexer, should_return_new_lexer) {
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "(3+ 4) *5");
+    
+    cr_expect_not_null(lexer);
+    cr_expect_str_eq(lexer->source, "(3+ 4) *5");
+    cr_expect_eq(lexer->cursor, 0);
 
-    char c0 = lexer_peek(&lexer, 0);
+    arena_release(a);
+}
+
+Test(peek, should_peek_char) {
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "(3+4)*5");
+
+    char c0 = lexer_peek(lexer, 0);
     cr_assert_eq(c0, '(');
 
-    char c1 = lexer_peek(&lexer, 1);
+    char c1 = lexer_peek(lexer, 1);
     cr_assert_eq(c1, '3');
 
-    cr_assert_eq(lexer.cursor, 0);
+    cr_assert_eq(lexer->cursor, 0);
+
+    arena_release(a);
 }
 
 Test(consume, should_consume_char) {
-    Lexer lexer = {
-        .source = "(3+4)*5",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "(3+4)*5");
 
-    char c0 = lexer_consume(&lexer);
+    char c0 = lexer_consume(lexer);
     cr_assert_eq(c0, '(');
 
-    char c1 = lexer_consume(&lexer);
+    char c1 = lexer_consume(lexer);
     cr_assert_eq(c1, '3');
 
-    cr_assert_eq(lexer.cursor, 2);
+    cr_assert_eq(lexer->cursor, 2);
+
+    arena_release(a);
 }
 
 Test(next_token, empty_input) {
-    Lexer lexer = {
-        .source = "",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "");
 
-    Token token = lexer_next_token(&lexer);
+    Token token = lexer_next_token(lexer);
 
     cr_assert_eq(token.type, TOKEN_END);
     cr_assert_eq(token.value, 0);
+
+    arena_release(a);
 }
 
 Test(next_token, operators) {
-    Lexer lexer = {
-        .source = "+-*/",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "+-*/");
 
-    Token token0 = lexer_next_token(&lexer);
-    Token token1 = lexer_next_token(&lexer);
-    Token token2 = lexer_next_token(&lexer);
-    Token token3 = lexer_next_token(&lexer);
-    Token token4 = lexer_next_token(&lexer);
+    Token token0 = lexer_next_token(lexer);
+    Token token1 = lexer_next_token(lexer);
+    Token token2 = lexer_next_token(lexer);
+    Token token3 = lexer_next_token(lexer);
+    Token token4 = lexer_next_token(lexer);
 
     cr_assert_eq(token0.type, TOKEN_PLUS);
     cr_assert_eq(token0.value, 0);
@@ -69,17 +78,17 @@ Test(next_token, operators) {
 
     cr_assert_eq(token4.type, TOKEN_END);
     cr_assert_eq(token4.value, 0);
+
+    arena_release(a);
 }
 
 Test(next_token, parentheses) {
-    Lexer lexer = {
-        .source = "()",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "()");
 
-    Token token0 = lexer_next_token(&lexer);
-    Token token1 = lexer_next_token(&lexer);
-    Token token2 = lexer_next_token(&lexer);
+    Token token0 = lexer_next_token(lexer);
+    Token token1 = lexer_next_token(lexer);
+    Token token2 = lexer_next_token(lexer);
 
     cr_assert_eq(token0.type, TOKEN_LPAREN);
     cr_assert_eq(token0.value, 0);
@@ -89,50 +98,50 @@ Test(next_token, parentheses) {
 
     cr_assert_eq(token2.type, TOKEN_END);
     cr_assert_eq(token2.value, 0);
+
+    arena_release(a);
 }
 
 Test(next_token, single_digit_number) {
-    Lexer lexer = {
-        .source = "5",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "5");
 
-    Token token0 = lexer_next_token(&lexer);
-    Token token1 = lexer_next_token(&lexer);
+    Token token0 = lexer_next_token(lexer);
+    Token token1 = lexer_next_token(lexer);
 
     cr_assert_eq(token0.type, TOKEN_NUMBER);
     cr_assert_eq(token0.value, 5);
 
     cr_assert_eq(token1.type, TOKEN_END);
     cr_assert_eq(token1.value, 0);
+
+    arena_release(a);
 }
 
 Test(next_token, multi_digit_number) {
-    Lexer lexer = {
-        .source = "0123450",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "0123450");
 
-    Token token0 = lexer_next_token(&lexer);
-    Token token1 = lexer_next_token(&lexer);
+    Token token0 = lexer_next_token(lexer);
+    Token token1 = lexer_next_token(lexer);
 
     cr_assert_eq(token0.type, TOKEN_NUMBER);
     cr_assert_eq(token0.value, 123450);
 
     cr_assert_eq(token1.type, TOKEN_END);
     cr_assert_eq(token1.value, 0);
+
+    arena_release(a);
 }
 
 Test(next_token, whitespace_skipping) {
-    Lexer lexer = {
-        .source = " 12 + 34 ",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, " 12 + 34 ");
 
-    Token token0 = lexer_next_token(&lexer);
-    Token token1 = lexer_next_token(&lexer);
-    Token token2 = lexer_next_token(&lexer);
-    Token token3 = lexer_next_token(&lexer);
+    Token token0 = lexer_next_token(lexer);
+    Token token1 = lexer_next_token(lexer);
+    Token token2 = lexer_next_token(lexer);
+    Token token3 = lexer_next_token(lexer);
 
     cr_assert_eq(token0.type, TOKEN_NUMBER);
     cr_assert_eq(token0.value, 12);
@@ -145,18 +154,18 @@ Test(next_token, whitespace_skipping) {
 
     cr_assert_eq(token3.type, TOKEN_END);
     cr_assert_eq(token3.value, 0);
+
+    arena_release(a);
 }
 
 Test(next_token, invalid_character) {
-    Lexer lexer = {
-        .source = "2 $ 3",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "2 $ 3");
 
-    Token token0 = lexer_next_token(&lexer);
-    Token token1 = lexer_next_token(&lexer);
-    Token token2 = lexer_next_token(&lexer);
-    Token token3 = lexer_next_token(&lexer);
+    Token token0 = lexer_next_token(lexer);
+    Token token1 = lexer_next_token(lexer);
+    Token token2 = lexer_next_token(lexer);
+    Token token3 = lexer_next_token(lexer);
 
     cr_assert_eq(token0.type, TOKEN_NUMBER);
     cr_assert_eq(token0.value, 2);
@@ -169,22 +178,22 @@ Test(next_token, invalid_character) {
 
     cr_assert_eq(token3.type, TOKEN_END);
     cr_assert_eq(token3.value, 0);
+
+    arena_release(a);
 }
 
 Test(next_token, mixed_expression) {
-    Lexer lexer = {
-        .source = "(3+4)*5",
-        .cursor = 0,
-    };
+    Arena* a = arena_alloc(50);
+    Lexer* lexer = create_lexer(a, "(3+4)*5");
 
-    Token token0 = lexer_next_token(&lexer);
-    Token token1 = lexer_next_token(&lexer);
-    Token token2 = lexer_next_token(&lexer);
-    Token token3 = lexer_next_token(&lexer);
-    Token token4 = lexer_next_token(&lexer);
-    Token token5 = lexer_next_token(&lexer);
-    Token token6 = lexer_next_token(&lexer);
-    Token token7 = lexer_next_token(&lexer);
+    Token token0 = lexer_next_token(lexer);
+    Token token1 = lexer_next_token(lexer);
+    Token token2 = lexer_next_token(lexer);
+    Token token3 = lexer_next_token(lexer);
+    Token token4 = lexer_next_token(lexer);
+    Token token5 = lexer_next_token(lexer);
+    Token token6 = lexer_next_token(lexer);
+    Token token7 = lexer_next_token(lexer);
 
     cr_assert_eq(token0.type, TOKEN_LPAREN);
     cr_assert_eq(token0.value, 0);
@@ -209,4 +218,6 @@ Test(next_token, mixed_expression) {
 
     cr_assert_eq(token7.type, TOKEN_END);
     cr_assert_eq(token7.value, 0);
+
+    arena_release(a);
 }
