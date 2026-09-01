@@ -1,5 +1,13 @@
 #include "parser.h"
 
+Parser* create_parser(Arena* arena, TokenList* token_list) {
+    Parser* parser = arena_push(arena, sizeof(Parser));
+    parser->cursor = 0;
+    parser->tokens = token_list;
+    
+    return parser;
+}
+
 // FIX out of bounds check
 Token* parser_peek(Parser* parser, size_t offset) {
     return &(parser->tokens->list[parser->cursor + offset]);

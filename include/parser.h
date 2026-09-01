@@ -7,6 +7,7 @@ typedef struct Parser {
     size_t cursor;
 } Parser;
 
+Parser* create_parser(Arena* arena, TokenList* token_list);
 
 Token* parser_peek(Parser* parser, size_t offset);
 Token* parser_consume(Parser* parser);

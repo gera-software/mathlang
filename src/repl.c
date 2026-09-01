@@ -13,7 +13,6 @@ void repl_start(void) {
     fgets(input, sizeof(input), stdin);
     // Actual loop comes later.
 
-    // TODO create lexer
     Lexer* lexer = create_lexer(a, input);
 
     TokenList* token_list = create_token_list(a, 10);
@@ -28,14 +27,10 @@ void repl_start(void) {
         }
     }
 
-    // TODO create parser
-    Parser parser = {
-        .tokens = token_list,
-        .cursor = 0,
-    };
+    Parser* parser = create_parser(a, token_list);
 
     // Parser step
-    ASTNode* ast = parse(a, &parser);
+    ASTNode* ast = parse(a, parser);
 
 
     printf("found %ld tokens\n", token_list->length);
