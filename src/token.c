@@ -26,6 +26,13 @@ TokenList* create_token_list(Arena* a, size_t capacity) {
     }
     token_list->capacity = capacity;
     token_list->length = 0;
+    token_list->arena = a;
 
     return token_list;
+}
+
+// TODO check capacity before pushing
+void token_list_push(TokenList* token_list, Token token) {
+    token_list->list[token_list->length] = token;
+    token_list->length++;
 }

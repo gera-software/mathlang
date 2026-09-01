@@ -25,8 +25,9 @@ typedef struct TokenList {
     Token* list; /* contiguous backing store */
     size_t capacity; /* total Tokens in the buffer */
     size_t length; /* current used Tokens / bump offset */
+    Arena* arena; /* arena onde a lista está alocada */
 } TokenList;
 
 TokenList* create_token_list(Arena* a, size_t capacity);
 
-void token_list_push(Token token);
+void token_list_push(TokenList* token_list, Token token);
