@@ -2,11 +2,11 @@
 
 // FIX out of bounds check
 Token* parser_peek(Parser* parser, size_t offset) {
-    return &(parser->tokens[parser->cursor + offset]);
+    return &(parser->tokens->list[parser->cursor + offset]);
 }
 
 Token* parser_consume(Parser* parser) {
-    return &(parser->tokens[parser->cursor++]);
+    return &(parser->tokens->list[parser->cursor++]);
 }
 
 ASTNode* parse_number(Arena* arena, Parser* parser) {
@@ -133,6 +133,6 @@ ASTNode* parse_expression(Arena* arena, Parser* parser) {
     return term_node_left;
 }
 
-ASTNode* parse(Parser* parser) {
-    return NULL;
+ASTNode* parse(Arena* a, Parser* parser) {
+    return parse_expression(a, parser);
 }

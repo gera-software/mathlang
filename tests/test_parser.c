@@ -4,22 +4,15 @@
 #include "ast.h"
 
 Test(peek, should_peek_token) {
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 200,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 300,
-        },
-    }; 
+    Arena *arena = arena_alloc(1024);
+
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 200 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 300 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -32,25 +25,20 @@ Test(peek, should_peek_token) {
     cr_expect_eq(expected1->value, 200);
 
     cr_assert_eq(parser.cursor, 0);
+
+    arena_release(arena);
 }
 
 Test(consume, should_consume_token) {
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 200,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 300,
-        },
-    }; 
+    Arena *arena = arena_alloc(1024);
+
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 200 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 300 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -63,31 +51,18 @@ Test(consume, should_consume_token) {
     cr_expect_eq(expected1->value, 200);
 
     cr_assert_eq(parser.cursor, 2);
-}
 
-Test(parse_suite, empty_input) {
-    Token array[] = {0};
-    Parser parser = {
-        .tokens = array,
-        .cursor = 0,
-    };
-
-    ASTNode* root = parse(&parser);
-
-    cr_assert_eq(root, NULL);
+    arena_release(arena);
 }
 
 Test(_parse_number, should_return_number_node) {
     Arena *arena = arena_alloc(1024);
+ 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-    }; 
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -102,13 +77,11 @@ Test(_parse_number, should_return_number_node) {
 Test(_parse_number, should_return_null) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_PLUS,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_PLUS, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -122,17 +95,12 @@ Test(_parse_number, should_return_null) {
 Test(_parse_unary_minus, should_return_negative_number_op) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -148,14 +116,11 @@ Test(_parse_unary_minus, should_return_negative_number_op) {
 Test(_parse_unary_minus, should_return_null) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -169,14 +134,12 @@ Test(_parse_unary_minus, should_return_null) {
 Test(_parse_factor, should_return_number_node) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-    }; 
+
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -191,17 +154,12 @@ Test(_parse_factor, should_return_number_node) {
 Test(_parse_factor, should_return_negative_number_op) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -217,17 +175,12 @@ Test(_parse_factor, should_return_negative_number_op) {
 Test(_parse_term, should_return_number) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_END,
-        }
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -242,24 +195,14 @@ Test(_parse_term, should_return_number) {
 Test(_parse_term, should_return_multiplication_op) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_STAR,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 5,
-        },
-        {
-            .type = TOKEN_END,
-        }
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_STAR, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 5 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -275,24 +218,14 @@ Test(_parse_term, should_return_multiplication_op) {
 Test(_parse_term, should_return_division_op) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_SLASH,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 5,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_SLASH, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 5 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -308,31 +241,16 @@ Test(_parse_term, should_return_division_op) {
 Test(_parse_term, should_return_associativity_tree) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 10,
-        },
-        {
-            .type = TOKEN_STAR,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 5,
-        },
-        {
-            .type = TOKEN_SLASH,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 2,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 10 });
+    token_list_push(token_list, (Token) { TOKEN_STAR, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 5 });
+    token_list_push(token_list, (Token) { TOKEN_SLASH, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 2 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -360,17 +278,12 @@ Test(_parse_term, should_return_associativity_tree) {
 Test(_parse_expression, should_return_number) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_END,
-        }
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -385,24 +298,14 @@ Test(_parse_expression, should_return_number) {
 Test(_parse_expression, should_return_addition_op) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_PLUS
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 5,
-        },
-        {
-            .type = TOKEN_END,
-        }
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_PLUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 5 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -418,24 +321,14 @@ Test(_parse_expression, should_return_addition_op) {
 Test(_parse_expression, should_return_subtraction_op) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 100,
-        },
-        {
-            .type = TOKEN_MINUS
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 5,
-        },
-        {
-            .type = TOKEN_END,
-        }
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 100 });
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 5 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -451,31 +344,16 @@ Test(_parse_expression, should_return_subtraction_op) {
 Test(_parse_expression, should_return_associativity_tree) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 10,
-        },
-        {
-            .type = TOKEN_PLUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 5,
-        },
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 2,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 10 });
+    token_list_push(token_list, (Token) { TOKEN_PLUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 5 });
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 2 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
@@ -503,21 +381,16 @@ Test(_parse_expression, should_return_associativity_tree) {
 Test(math, simple_number) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 42,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 42 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
-    ASTNode* expected = parse_expression(arena, &parser);
+    ASTNode* expected = parse(arena, &parser);
 
     StrBuf sb = {0};
     sb_init(&sb, 250);
@@ -533,35 +406,20 @@ Test(math, simple_number) {
 Test(math, addition_left_associativity) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 10,
-        },
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 3,
-        },
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 2,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 10 });
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 3 });
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 2 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
-    ASTNode* expected = parse_expression(arena, &parser);
+    ASTNode* expected = parse(arena, &parser);
 
     StrBuf sb = {0};
     sb_init(&sb, 250);
@@ -577,35 +435,20 @@ Test(math, addition_left_associativity) {
 Test(math, term_precedence) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_NUMBER,
-            .value = 2,
-        },
-        {
-            .type = TOKEN_PLUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 3,
-        },
-        {
-            .type = TOKEN_STAR,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 4,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 2 });
+    token_list_push(token_list, (Token) { TOKEN_PLUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 3 });
+    token_list_push(token_list, (Token) { TOKEN_STAR, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 4 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
-    ASTNode* expected = parse_expression(arena, &parser);
+    ASTNode* expected = parse(arena, &parser);
 
     StrBuf sb = {0};
     sb_init(&sb, 250);
@@ -620,32 +463,20 @@ Test(math, term_precedence) {
 
 Test(math, unary_minus) {
     Arena *arena = arena_alloc(1024);
-
-    Token array[] = { 
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 3,
-        },
-        {
-            .type = TOKEN_PLUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 2,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 3 });
+    token_list_push(token_list, (Token) { TOKEN_PLUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 2 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+    
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
-    ASTNode* expected = parse_expression(arena, &parser);
+    ASTNode* expected = parse(arena, &parser);
 
     StrBuf sb = {0};
     sb_init(&sb, 250);
@@ -661,27 +492,18 @@ Test(math, unary_minus) {
 Test(math, nested_unary_minus) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_MINUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 5,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_MINUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 5 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
-    ASTNode* expected = parse_expression(arena, &parser);
+    ASTNode* expected = parse(arena, &parser);
 
     StrBuf sb = {0};
     sb_init(&sb, 250);
@@ -697,41 +519,22 @@ Test(math, nested_unary_minus) {
 Test(math, parentheses) {
     Arena *arena = arena_alloc(1024);
 
-    Token array[] = { 
-        {
-            .type = TOKEN_LPAREN,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 2,
-        },
-        {
-            .type = TOKEN_PLUS,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 3,
-        },
-        {
-            .type = TOKEN_RPAREN,
-        },
-        {
-            .type = TOKEN_STAR,
-        },
-        {
-            .type = TOKEN_NUMBER,
-            .value = 4,
-        },
-        {
-            .type = TOKEN_END,
-        },
-    }; 
+    TokenList* token_list = create_token_list(arena, 10);
+    token_list_push(token_list, (Token) { TOKEN_LPAREN, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 2 });
+    token_list_push(token_list, (Token) { TOKEN_PLUS, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 3 });
+    token_list_push(token_list, (Token) { TOKEN_RPAREN, 0 });
+    token_list_push(token_list, (Token) { TOKEN_STAR, 0 });
+    token_list_push(token_list, (Token) { TOKEN_NUMBER, 4 });
+    token_list_push(token_list, (Token) { TOKEN_END, 0 });
+
     Parser parser = {
-        .tokens = array,
+        .tokens = token_list,
         .cursor = 0,
     };
 
-    ASTNode* expected = parse_expression(arena, &parser);
+    ASTNode* expected = parse(arena, &parser);
 
     StrBuf sb = {0};
     sb_init(&sb, 250);
@@ -743,3 +546,19 @@ Test(math, parentheses) {
     sb_free(&sb);
     arena_release(arena);
 }
+
+// Test(math, empty_input) {
+//     Arena *arena = arena_alloc(1024);
+
+//     Token array[] = {0};
+//     Parser parser = {
+//         .tokens = array,
+//         .cursor = 0,
+//     };
+
+//     ASTNode* root = parse(arena, &parser);
+
+//     cr_assert_eq(root, NULL);
+
+//     arena_release(arena);
+// }

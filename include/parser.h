@@ -3,7 +3,7 @@
 #include "lexer.h"
 
 typedef struct Parser {
-    Token *tokens;
+    TokenList *tokens;
     size_t cursor;
 } Parser;
 
@@ -17,4 +17,4 @@ ASTNode* parse_factor(Arena* arena, Parser* parser);
 ASTNode* parse_number(Arena* arena, Parser* parser);
 ASTNode* parse_unary_minus(Arena* arena, Parser* parser);
 
-ASTNode* parse(Parser* parser);
+ASTNode* parse(Arena* arena, Parser* parser);
